@@ -4,3 +4,7 @@ An Application Tracking System to help job finders ease their out-of-control spr
 ## Dev TODO list
 
 - How to integrate React w/ Django? After we figure that out, we can start scaffolding our project.
+
+# Reference
+
+- [This repo](https://github.com/rivernews/appl-tracky)
