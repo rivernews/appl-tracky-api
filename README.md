@@ -11,3 +11,4 @@ An Application Tracking System to help job finders ease their out-of-control spr
 # Reference
 
 - [This repo](https://github.com/rivernews/appl-tracky)
+- [The frontend react repo](https://github.com/rivernews/appl-tracky)
