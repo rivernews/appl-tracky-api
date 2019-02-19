@@ -15,7 +15,7 @@ An Application Tracking System to help job finders ease their out-of-control spr
         - The public DNS is `ec2-107-22-157-134.compute-1.amazonaws.com`, and public IP is `107.22.157.134`. Now ssh to the container by `ssh -i path/to/pem ec2-user@107.22.157.134`
         - According to [this aws doc](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/instance-connect.html), "If you did not specify a key pair when you launched your instance, there is no way to connect to the instance."
         - What we will do: **create a new series of instance, task, service for this project (tracky) using some automation tool**. Then, use the same tool to re-create the bb backend container and related service/task. We will deal with CI/CD later.
-            - **First we need to dockerize Django**. Docker for Django is quite complicate, as we have to setup Nginx, gunicorn, and basically a linux environment. [Follow this post](https://medium.com/@rohitkhatana/deploying-django-app-on-aws-ecs-using-docker-gunicorn-nginx-c90834f76e21).
+            - 🔥 🔥 🔥 **First we need to dockerize Django**. Docker for Django is quite complicate, as we have to setup Nginx, gunicorn, and basically a linux environment. [Follow this post](https://medium.com/@rohitkhatana/deploying-django-app-on-aws-ecs-using-docker-gunicorn-nginx-c90834f76e21).
             - Next: figure out how to use Terraform to create those resources.
     - Steps
         1. Create AWS resources by automation tool, perhaps terraform.
@@ -26,6 +26,6 @@ An Application Tracking System to help job finders ease their out-of-control spr
 
 # Reference
 
-- [This repo](https://github.com/rivernews/appl-tracky)
+- [This repo](https://github.com/rivernews/appl-tracky-api)
 - [The frontend react repo](https://github.com/rivernews/appl-tracky)
 - [Diff between Nignx and gunicorn]()
