@@ -31,4 +31,6 @@ RUN apk del build-deps
 # COPY . /usr/src/django/
 
 # run entrypoint.sh
+RUN echo In Dockerfile: chomd on entrypoint.sh
+RUN sudo chmod +x ./entrypoint.sh
 ENTRYPOINT ["/usr/src/django/entrypoint.sh"]
