@@ -82,3 +82,4 @@ An Application Tracking System to help job finders ease their out-of-control spr
         - Bad network while building docker image and can't pull down docker image resources? Try to restart docker service and rebuild again.
         - [port and expose](https://stackoverflow.com/questions/35548843/does-ports-on-docker-compose-yml-have-the-same-effect-as-expose-on-dockerfile)
 - `ecs-cli` [commands](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_CLI_reference.html).
+- [Setup subdomain for different app](http://altitudelabs.com/blog/how-to-set-up-app-subdomain-route-53/)
