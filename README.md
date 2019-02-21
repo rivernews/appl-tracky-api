@@ -15,8 +15,44 @@ An Application Tracking System to help job finders ease their out-of-control spr
         - The public DNS is `ec2-107-22-157-134.compute-1.amazonaws.com`, and public IP is `107.22.157.134`. Now ssh to the container by `ssh -i path/to/pem ec2-user@107.22.157.134`
         - According to [this aws doc](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/instance-connect.html), "If you did not specify a key pair when you launched your instance, there is no way to connect to the instance."
         - What we will do: **create a new series of instance, task, service for this project (tracky) using some automation tool**. Then, use the same tool to re-create the bb backend container and related service/task. We will deal with CI/CD later.
-            - 🔥 🔥 🔥 **First we need to dockerize Django**. Docker for Django is quite complicate, as we have to setup Nginx, gunicorn, and basically a linux environment. [Follow this post](https://medium.com/@rohitkhatana/deploying-django-app-on-aws-ecs-using-docker-gunicorn-nginx-c90834f76e21).
+            - **First we need to dockerize Django**. Docker for Django is quite complicate, as we have to setup Nginx, gunicorn, and basically a linux environment. [Follow this post](https://medium.com/@rohitkhatana/deploying-django-app-on-aws-ecs-using-docker-gunicorn-nginx-c90834f76e21). [Found this newer article, will use this to dockerize](https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/).
+                - We are skipping the Serving Media File part. Note that both Serving Static/Media File in [the article](https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/) are all exposed to public access. This is explained in [this SO post](https://stackoverflow.com/a/28167298/9814131), where Nginx doesn't have access to user authentication in Django so have to do special settings for both Django and Nginx. Or, if you really want to host private files on in the container, [try this answer](https://stackoverflow.com/a/28167162/9814131), where it refrain from using MEDIA_URL and STATIC_URL, instead, it uses a Django view as guard and serve the file by streaming it back to the client. (So the client "download" it). This is different from a S3 approach where Django only handles text-based URLs and provide that URL to client directly. The responsibility for restricting private file is now lay to S3.
+
             - Next: figure out how to use Terraform to create those resources.
+                - Consider creating new ECS in east-2 so you can reuse stuff like https certificate, etc.
+                - Create container (ECR) --> task definition --> cluster --> service in terraform
+                    - How to create ECR in terraform: Make sure where the docker image come from, and interpolate into container_definition json
+                        - Do we need both resource and data source for ecr? Because for Task definition he did that! But he later use data.task_definition so he did use it. ==> we'll just use resource for ECR.
+                            - TODO: The image tag thing is still remain unclear...
+                    - Task definition: are we all set?
+                    - Next: service, ...
+                - We decide to try `ecs-cli` instead of `terraform`.
+                    - `brew install amazon-ecs-cli`
+                    - Create a profile `ecs-cli configure profile --profile-name ApplTrackyProfile --access-key $AWS_ACCESS_KEY_ID --secret-key $AWS_SECRET_ACCESS_KEY`
+                        - verify `cat ~/.ecs/credentials`
+                    - Create a config for cluster `ecs-cli configure --cluster ApplTrackyCluster --region $AWS_REGION --default-launch-type EC2 --config-name ApplTrackyConfig`
+                        - verify `cat ~/.ecs/config`
+                    - Create cluster `ecs-cli up --debug --keypair shaungc-ecs --capability-iam --launch-type EC2 --size 1 --instance-type t2.micro --azs us-east-2a,us-east-2b --image-id ami-04b61a4d3b11cc8ea --force --cluster-config ApplTrackyConfig --cluster ApplTrackyCluster`
+                        - **Important**: grant IAM user/role with `ECSFullAccess` and `IAMFullAccess` (and also `EC2FullAccess`).
+                        - Warning: [this post](https://github.com/aws/amazon-ecs-cli/issues/318) talks about using `AWS EBS` as storage, instead of storing data on the cluster.
+                        - Make sure you use the key name on EC2 when specifying the key pair, [not the local path](https://stackoverflow.com/questions/48471739/ecs-cli-key-pair-error-when-calling-up).
+                        - [Full list of available parameters](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cmd-ecs-cli-up.html).
+                        - Options that we didn't specify: `--security-group`, `--port`, `--vpc`, `--subnets` ...
+                    - 🔥 🔥 🔥 Create by docker compose
+                        - [Setup environment secrets](https://medium.com/@felipgomesilva/using-secrets-in-aws-ecs-dc43c37ce4a1).
+                        - Manually create ECR
+                        - Manually create two repos on ECR, named `appl-tracky/nginx` and `appl-tracky/django`, this will be a one-time action.
+                        - Put the base ECR url as evironment variable `AWS_ECR_URL` in `.env`.
+                        - Create `image:` entry in `docker-compose.yml`, [like this SO post](https://stackoverflow.com/a/51663052/9814131). Also add a `link:` in `ecs-params.yml`, according to [this post](https://docker-curriculum.com/), maybe it can replace the unsupported `depends_on:`.
+                            - Make sure to specify `assign_public_ip: ENABLED` in `ecs-params.yml`, or [your ecs compose up might fail](https://github.com/aws/amazon-ecs-agent/issues/1654).
+                        - Dealing with Volume: pgrepare two versions of `docker-compose.yml`. [We cannot mount source directory](https://medium.com/@peatiscoding/docker-compose-ecs-91b033c8fdb6) using the dot in `./django/:`. So duplicate another YAML as `docker-compose-ecs.yml`, remove the whole line of `./django/:/usr/src/django/`. Go into `Dockerfile` and copy the whole project to container's directory: `ADD . /usr/src/django/`.
+                        - Do pip install `awscli` (use django's venv) and login to ECR by `$(aws ecr get-login --no-include-email --region us-east-2)`
+                        - `docker-compose build`, it'll build all images and set the `:latest` tag for you.
+                        - **Make sure you run in project root directory:** `docker-compose push` 
+                        - Compose: `ecs-cli compose --debug --file docker-compose-ecs.yml --project-name ApplTracky --ecs-params ecs-params.yml --cluster-config ApplTrackyConfig --cluster ApplTrackyCluster up --force-update`
+                            - check status `ecs-cli ps`
+                - Push the docker image to ECR by AWS CodeBuild, test out the production site.
+                - Do we have to setup a Load Balancer?
     - Steps
         1. Create AWS resources by automation tool, perhaps terraform.
             - Try [terraform](https://www.terraform.io/docs/providers/aws/index.html).
@@ -29,3 +65,19 @@ An Application Tracking System to help job finders ease their out-of-control spr
 - [This repo](https://github.com/rivernews/appl-tracky-api)
 - [The frontend react repo](https://github.com/rivernews/appl-tracky)
 - [Diff between Nignx and gunicorn]()
+- DB in Docker
+    - MySQL
+        - [HackerNews: Using MySQL in Django Docker Project](https://hackernoon.com/8-tips-for-containerizing-django-apps-5340647632a4)
+    - Need to reset database volume in docker image/container? [See the argument (Github)](https://github.com/docker/compose/issues/2127), or [this SO](https://stackoverflow.com/questions/39776713/docker-compose-reinitializing-mysql-db-every-time).
+    - Postgres: resetting things. [Default user and password are automatically set.](https://www.liquidweb.com/kb/what-is-the-default-password-for-postgresql/): default user is `postgres`, default password is `postgres`, default db name is `postgres`, default host url is `db`. If you want to change this, [follow this SO ](https://stackoverflow.com/q/46669759/9814131) by adding `POSTGRES_DB`, ..., etc. It'll automatically create the default database, username, ... by what you specify.
+        - Connect to Postgres server by `docker-compose exec db psql db-name username`
+- Docker commands
+    - List all volumes. `docker volume ls`.
+    - Delete a named volume: `docker volume rm <volume name like appl-tracky-api_postgres_data>`
+    - Build and turn on all: `docker-compose up -d --build`.
+    - Turn off and delete all containers (but not named volumes): `docker-compose down`
+    - Run django commands: `docker-compose exec web python manage.py ...`
+    - Troubleshooting
+        - Bad network while building docker image and can't pull down docker image resources? Try to restart docker service and rebuild again.
+        - [port and expose](https://stackoverflow.com/questions/35548843/does-ports-on-docker-compose-yml-have-the-same-effect-as-expose-on-dockerfile)
+- `ecs-cli` [commands](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_CLI_reference.html).
