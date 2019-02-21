@@ -33,4 +33,4 @@ RUN apk del build-deps
 
 # run entrypoint.sh
 RUN echo In Dockerfile: chomd on entrypoint.sh
-ENTRYPOINT ["/bin/bash", "-c", "chmod +x /usr/src/django/entrypoint.sh && /usr/src/django/entrypoint.sh"]
+ENTRYPOINT ["chmod +x /usr/src/django/entrypoint.sh && /usr/src/django/entrypoint.sh"]
