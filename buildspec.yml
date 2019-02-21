@@ -21,7 +21,7 @@ phases:
       # - docker-compose pull --ignore-pull-failures --parallel 2>&1 | tee -a log.txt
   build:
     commands:
-      - echo Building the Docker Compose images ... | tee -a log.txt
+      - echo Building the Docker Compose images ...  | tee -a log.txt
       - docker-compose build 2>&1 | tee -a log.txt
   post_build:
     commands:
