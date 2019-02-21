@@ -9,6 +9,7 @@ EXPOSE 8000
 # set work directory
 WORKDIR /usr/src/django
 
+RUN echo Copying all stuff into container...
 COPY . /usr/src/django/
 
 # prepare db adapter dev env (psycopg2)
@@ -32,5 +33,4 @@ RUN apk del build-deps
 
 # run entrypoint.sh
 RUN echo In Dockerfile: chomd on entrypoint.sh
-RUN sudo chmod +x ./entrypoint.sh
-ENTRYPOINT ["/usr/src/django/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "chmod +x /usr/src/django/entrypoint.sh && /usr/src/django/entrypoint.sh"]
