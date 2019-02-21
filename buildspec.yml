@@ -14,6 +14,7 @@ phases:
       # - aws sns publish --topic-arn "${SNS_TOPIC_ARN}" --subject "AWS CodeBuild Started - ${CODEBUILD_BUILD_ID}" --message file://sns-message.txt
       - echo Logging in to Amazon ECR ... | tee -a log.txt
       - $(aws ecr get-login --region us-east-2  --no-include-email)
+      - ECR_REPO_BASE_URL=368061806057.dkr.ecr.us-east-2.amazonaws.com/appl-tracky
       # - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       # - IMAGE_TAG=${COMMIT_HASH:=latest}
       # - echo Pulling Docker Images for cache ... | tee -a log.txt
@@ -33,3 +34,7 @@ phases:
       - echo "CODEBUILD_BUILD_SUCCEEDING:${CODEBUILD_BUILD_SUCCEEDING}" | tee -a sns-message.txt
       # - echo Sending notification ...
       # - aws sns publish --topic-arn "${SNS_TOPIC_ARN}" --subject "AWS CodeBuild Completed - ${CODEBUILD_BUILD_ID}" --message file://sns-message.txt
+      - echo Writing artifact file...
+      - printf '[{"name":"web", "imageUri":"%s"},{"name":"nginx", "imageUri":"%s"},{"name":"db", "imageUri":"%s"}]' ${ECR_REPO_BASE_URL}/django:latest ${ECR_REPO_BASE_URL}/nginx:latest "postgres:10.5-alpine" > imagedefinitions.json
+artifacts:
+    files: imagedefinitions.json
