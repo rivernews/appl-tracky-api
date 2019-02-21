@@ -150,6 +150,8 @@ Temporary Items
 # Edit at https://www.gitignore.io/?templates=terraform
 
 ### Terraform ###
+*.tf
+
 # Local .terraform directories
 **/.terraform/*
 

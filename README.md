@@ -48,8 +48,9 @@ An Application Tracking System to help job finders ease their out-of-control spr
                         - Dealing with Volume: pgrepare two versions of `docker-compose.yml`. [We cannot mount source directory](https://medium.com/@peatiscoding/docker-compose-ecs-91b033c8fdb6) using the dot in `./django/:`. So duplicate another YAML as `docker-compose-ecs.yml`, remove the whole line of `./django/:/usr/src/django/`. Go into `Dockerfile` and copy the whole project to container's directory: `ADD . /usr/src/django/`.
                         - Do pip install `awscli` (use django's venv) and login to ECR by `$(aws ecr get-login --no-include-email --region us-east-2)`
                         - `docker-compose build`, it'll build all images and set the `:latest` tag for you.
+                            - You can test it to run by `docker-compose up -d`.
                         - **Make sure you run in project root directory:** `docker-compose push` 
-                        - Compose: `ecs-cli compose --debug --file docker-compose-ecs.yml --project-name ApplTracky --ecs-params ecs-params.yml --cluster-config ApplTrackyConfig --cluster ApplTrackyCluster up --force-update`
+                        - Compose: `ecs-cli compose --debug --file docker-compose-ecs.yml --project-name ApplTracky --ecs-params ecs-params.yml --cluster-config ApplTrackyConfig --cluster ApplTrackyCluster  service up`
                             - check status `ecs-cli ps`
                 - Push the docker image to ECR by AWS CodeBuild, test out the production site.
                 - Do we have to setup a Load Balancer?

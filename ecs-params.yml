@@ -1,0 +1,120 @@
+version: 1
+task_definition:
+  ecs_network_mode: bridge
+  # task_role_arn: string
+  # task_execution_role: string
+  # task_size:
+  #   cpu_limit: 1024
+  #   mem_limit: 1GB
+  # pid_mode: string
+  # ipc_mode: string
+  services:
+    nginx:
+      # essential: boolean
+      # repository_credentials:
+      #   credentials_parameter: string
+      cpu_shares: 100
+      mem_limit: 0.25GB
+      # mem_reservation: 0.25GB
+      # healthcheck:
+      #   test: ["CMD", "curl -f http://localhost"]
+      #   interval: string
+      #   timeout: string
+      #   retries: integer
+      #   start_period: string
+      # secrets:
+      #   - value_from: string
+      #     name: string
+      links:
+        - web
+    web:
+      # essential: boolean
+      # repository_credentials:
+      #   credentials_parameter: string
+      cpu_shares: 100
+      mem_limit: 0.25GB
+      # mem_reservation: 0.25GB
+      # healthcheck:
+      #   test: ["CMD", "curl -f http://localhost"]
+      #   interval: string
+      #   timeout: string
+      #   retries: integer
+      #   start_period: string
+      # secrets:
+      #   - value_from: arn:aws:ssm:region:368061806057:parameter/appl-tracky/DJANGO_SECRET_KEY
+      #     name: DJANGO_SECRET_KEY
+      #   - value_from: arn:aws:ssm:region:368061806057:parameter/appl-tracky/SQL_DATABASE
+      #     name: SQL_DATABASE
+      #   - value_from: arn:aws:ssm:region:368061806057:parameter/appl-tracky/SQL_USER
+      #     name: SQL_USER
+      #   - value_from: arn:aws:ssm:region:368061806057:parameter/appl-tracky/SQL_PASSWORD
+      #     name: SQL_PASSWORD
+      #   - value_from: arn:aws:ssm:region:368061806057:parameter/appl-tracky/SQL_HOST
+      #     name: SQL_HOST
+      links:
+        - db
+    db:
+      # essential: boolean
+      # repository_credentials:
+      #   credentials_parameter: string
+      cpu_shares: 100
+      mem_limit: 0.25GB
+      # mem_reservation: 0.25GB
+      # healthcheck:
+      #   test: ["CMD", "curl -f http://localhost"]
+      #   interval: string
+      #   timeout: string
+      #   retries: integer
+      #   start_period: string
+      # secrets:
+      #   - value_from: arn:aws:ssm:region:368061806057:parameter/appl-tracky/SQL_DATABASE
+      #     name: SQL_DATABASE
+      #   - value_from: arn:aws:ssm:region:368061806057:parameter/appl-tracky/SQL_USER
+      #     name: SQL_USER  
+      #   - value_from: arn:aws:ssm:region:368061806057:parameter/appl-tracky/SQL_PASSWORD
+      #     name: SQL_PASSWORD
+#   docker_volumes:
+#       - name: string
+#         scope: string
+#         autoprovision: 
+#         driver: string
+#         driver_opts: boolean
+#            string: string
+#         labels:
+#            string: string
+run_params:
+  network_configuration:
+    awsvpc_configuration:
+#       subnets: 
+#         - subnet_id1 
+#         - subnet_id2
+#       security_groups: 
+#         - secgroup_id1
+#         - secgroup_id2
+      assign_public_ip: ENABLED
+#   task_placement:
+#     strategy:
+#       - type: string
+#         field: string
+#     constraints:
+#       - type: string
+#          expression: string
+#   service_discovery:
+#     container_name: string
+#     container_port: integer
+#     private_dns_namespace:
+#         vpc: string
+#         id: string
+#         name: string
+#         description: string
+#     public_dns_namespace:
+#         id: string
+#         name: string
+#     service_discovery_service:
+#         name: string
+#         description: string
+#         dns_config:
+#           type: string
+#           ttl: integer
+#         healthcheck_custom_config:
+#           failure_threshold: integer

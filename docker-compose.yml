@@ -1,0 +1,51 @@
+version: '2'
+
+services:
+  nginx:
+    build: ./nginx
+    image: '$AWS_ECR_URL/appl-tracky/nginx:$IMAGE_TAG'
+    volumes:
+      - global_static:/usr/src/django/global_static
+    ports:
+      # - "1337:80"
+      - "80:80"
+    depends_on:
+      - web
+  web:
+    build: ./django
+    image: '$AWS_ECR_URL/appl-tracky/django:$IMAGE_TAG'
+    # command: gunicorn django_server.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./django/:/usr/src/django/
+      - global_static:/usr/src/django/global_static
+    # expose:
+    #   - 8000
+    # env_file:
+    #   - web.configs
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DATABASE=postgres
+      - SQL_ENGINE=django.db.backends.postgresql
+      - SQL_DATABASE=${SQL_DATABASE}
+      - SQL_USER=${SQL_USER}
+      - SQL_PASSWORD=${SQL_PASSWORD}
+      - SQL_HOST=${SQL_HOST}
+      - SQL_PORT=5432
+    depends_on:
+      - db
+  db:
+    image: postgres:10.5-alpine
+    # env_file:
+    #   - db.configs
+    environment:
+      POSTGRES_DB: ${SQL_DATABASE}
+      POSTGRES_USER: ${SQL_USER}
+      POSTGRES_PASSWORD: ${SQL_PASSWORD}
+      POSTGRES_DATA: /var/lib/postgresql/data/
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+  
+
+volumes:
+  postgres_data:
+  global_static:
