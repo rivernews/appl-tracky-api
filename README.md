@@ -52,6 +52,7 @@ An Application Tracking System to help job finders ease their out-of-control spr
                         - **Make sure you run in project root directory:** `docker-compose push` 
                         - Compose: `ecs-cli compose --debug --file docker-compose-ecs.yml --project-name ApplTracky --ecs-params ecs-params.yml --cluster-config ApplTrackyConfig --cluster ApplTrackyCluster  service up`
                             - check status `ecs-cli ps`
+                        - Manually creating task definitions. [Mount host volume correctly](https://stackoverflow.com/questions/36904908/amazon-ecs-host-directory-access).
                 - Push the docker image to ECR by AWS CodeBuild, test out the production site.
                 - Do we have to setup a Load Balancer?
     - Steps

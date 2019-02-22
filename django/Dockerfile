@@ -34,4 +34,5 @@ RUN apk del build-deps
 # run entrypoint.sh
 RUN echo In Dockerfile: chomd on entrypoint.sh
 # ENTRYPOINT ["chmod +x /usr/src/django/entrypoint.sh && /usr/src/django/entrypoint.sh"]
+# see https://stackoverflow.com/questions/29535015/error-cannot-start-container-stat-bin-sh-no-such-file-or-directory
 ENTRYPOINT ["/bin/sh","-c","chmod +x /usr/src/django/entrypoint.sh && /usr/src/django/entrypoint.sh"]
