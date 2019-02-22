@@ -17,13 +17,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+try:
+    from .credentials import *
+except ImportError:
+    DEBUG = False
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-if DEBUG:
-    from .credentials import *
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 
