@@ -19,7 +19,7 @@ echo "Now running orchestration tool to update service..." && \
 cd terraform && \
 terraform apply && \
 cd .. && \
-echo "SUCESS! Go to the url and check it out." && return
+echo "SUCCESS! Go to the url and check it out." && return
 
 echo Info: error occurred, reverting to original path...
 cd "${ABSPATH}"
