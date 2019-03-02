@@ -1,3 +1,7 @@
+ABSPATH=$(cd "$(dirname "$0")"; pwd)
+
+echo "INFO: this script is executed at ${ABSPATH}."
+
 if [[ $1 != "" ]];
 then
     git add .
@@ -17,4 +21,6 @@ terraform apply && \
 cd .. && \
 echo "SUCESS! Go to the url and check it out." && return
 
+echo Info: error occurred, reverting to original path...
+cd "${ABSPATH}"
 echo ERROR: see above message.
