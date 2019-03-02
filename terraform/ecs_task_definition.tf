@@ -1,7 +1,7 @@
 data "aws_ecr_repository" "web" {
   name = "${var.project_safe_name}/${var.ecr_repo_web_primary_name}"
 
-  # other available vars exposed: (https://www.terraform.io/docs/providers/aws/r/ecr_repository.html)
+  # other available vars exposed: (https://www.terraform.io/docs/providers/aws/d/ecr_repository.html)
   # arn
   # registry_id
   # repository_url
@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "test" {
 [
      {
       "name": "${var.task_container_name_nginx}",
-      "image": "${data.aws_ecr_repository.nginx.repository_url}:latest",
+      "image": "${data.aws_ecr_repository.nginx.repository_url}:${var.ecr_new_image_tag}",
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
@@ -82,7 +82,7 @@ resource "aws_ecs_task_definition" "test" {
 
     {
       "name": "${var.task_container_name_web}",
-      "image": "${data.aws_ecr_repository.web.repository_url}:latest",
+      "image": "${data.aws_ecr_repository.web.repository_url}:${var.ecr_new_image_tag}",
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
@@ -172,7 +172,7 @@ resource "aws_ecs_task_definition" "test" {
         }
       },
       "entryPoint": null,
-      "portMappings": [],
+      "portMappings": null,
       "command": null,
       "linuxParameters": null,
       "cpu": 16,
