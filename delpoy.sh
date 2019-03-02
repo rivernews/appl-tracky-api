@@ -15,9 +15,8 @@ cd .. && \
 $(aws ecr get-login --no-include-email --region us-east-2) && \
 NEW_IMAGE_TAG=$(git rev-parse --short HEAD) && \
 echo "INFO: Git short hash is ${NEW_IMAGE_TAG}, we will use this as new image tag." && \
-echo "INFO: hey ${AWS_ECR_NGINX_REPO_URI}" && \
+source .env && echo INFO: Sourced environment file. && \
 docker-compose up -d --build --remove-orphans && \
-ls -la && source .env && echo INFO: Sourced environment file. && \
 docker tag "${AWS_ECR_NGINX_REPO_URI}:latest" "${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && \
 docker tag "${AWS_ECR_WEB_REPO_URI}:latest" "${AWS_ECR_WEB_REPO_URI}:${NEW_IMAGE_TAG}" && \
 docker push "${AWS_ECR_NGINX_REPO_URI}:latest" "${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && \
