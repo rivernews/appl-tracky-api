@@ -34,7 +34,6 @@ services:
       - SQL_PORT=5432
     depends_on:
       - db
-    tty: true
   db:
     image: postgres:10.5-alpine
     # env_file:
