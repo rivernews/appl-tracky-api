@@ -14,7 +14,7 @@ source ./venv/bin/activate && \
 cd .. && \
 $(aws ecr get-login --no-include-email --region us-east-2) && \
 NEW_IMAGE_TAG=$(git rev-parse --short HEAD) docker-compose up -d --build --remove-orphans && \
-source ./.env && echo INFO: Sourced environment file. \
+source .env && echo INFO: Sourced environment file. \
 docker tag "${AWS_ECR_NGINX_REPO_URI}:latest" "${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && \
 docker tag "${AWS_ECR_WEB_REPO_URI}:latest" "${AWS_ECR_WEB_REPO_URI}:${NEW_IMAGE_TAG}" && \
 docker push "${AWS_ECR_NGINX_REPO_URI}:latest" "${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && \
