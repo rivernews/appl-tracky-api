@@ -19,10 +19,12 @@ source .env && echo "INFO: Sourced environment file. ${AWS_ECR_NGINX_REPO_URI}:l
 docker-compose --log-level DEBUG up -d --build --remove-orphans
 
 echo "INFO: docker-compose build complete." && \
-docker tag "${AWS_ECR_NGINX_REPO_URI}:latest" "${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && \
-docker tag "${AWS_ECR_WEB_REPO_URI}:latest" "${AWS_ECR_WEB_REPO_URI}:${NEW_IMAGE_TAG}" && \
-docker push "${AWS_ECR_NGINX_REPO_URI}:latest" "${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && \
-docker push "${AWS_ECR_WEB_REPO_URI}:latest" "${AWS_ECR_WEB_REPO_URI}:${NEW_IMAGE_TAG}" && \
+docker tag "${AWS_ECR_NGINX_REPO_URI}:latest" "${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && echo "INFO: finish tagging ${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && \
+docker tag "${AWS_ECR_WEB_REPO_URI}:latest" "${AWS_ECR_WEB_REPO_URI}:${NEW_IMAGE_TAG}" && echo "INFO: finish tagging ${AWS_ECR_WEB_REPO_URI}:${NEW_IMAGE_TAG}" && \
+docker push "${AWS_ECR_NGINX_REPO_URI}:latest" && \
+docker push "${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && \
+docker push "${AWS_ECR_WEB_REPO_URI}:latest" && \
+docker push "${AWS_ECR_WEB_REPO_URI}:${NEW_IMAGE_TAG}" && \
 echo "SUCESS! ECR image ready." && \
 echo "Now running orchestration tool to update service..." && \
 cd terraform && \
