@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
   nginx:
@@ -9,6 +9,7 @@ services:
     ports:
       # - "1337:80"
       - "80:80"
+      - "443:443"
     depends_on:
       - web
   web:
@@ -16,7 +17,7 @@ services:
     image: '$AWS_ECR_URL/appl-tracky/django:$IMAGE_TAG'
     # command: gunicorn django_server.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - ./django/:/usr/src/django/
+      # - ./django/:/usr/src/django/
       - global_static:/usr/src/django/global_static
     # expose:
     #   - 8000
