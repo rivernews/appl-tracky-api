@@ -6,8 +6,8 @@ resource "aws_ecs_service" "test-ecs-service" {
   iam_role        = "${aws_iam_role.ecs-service-role.name}"
   
   # allow service interruption upon new deployment and only run one instance of task at max: https://stackoverflow.com/a/46029034/9814131
-  deployment_minimum_healthy_percent = 0
-  deployment_maximum_percent = 100
+  # deployment_minimum_healthy_percent = 0 # default is 100
+  # deployment_maximum_percent = 100 # default is 200
 
   load_balancer {
     target_group_arn = "${aws_alb_target_group.http.id}"
