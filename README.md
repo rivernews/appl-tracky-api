@@ -6,18 +6,25 @@ An Application Tracking System to help job finders ease their out-of-control spr
 Back End
 
 - Build REST API
-    - [ ] 🔥 🔥 🔥 Test out database access. If one table can work, all table can work.
+    - [ ] Test out database access. If one table can work, all table can work.
         - [x] Create the `Company` table, and create required related tables.
-        - [x] Setup relationship
+        - [x] Setup relationships and fields. No need to fill in arguments yet.
+            - **Change `OneToMany` to `ForeignKey`**: `OneToMany` relationship [should be implemented by `ForiegnKey`](https://stackoverflow.com/a/6929269/9814131), which is `ManyToOne`. So put the foreign key at the other side, then you can use reverse lookup to acheive `OneToMany`.
         - Complete arguments for models:
-            - [x] nullability. ([`blank` vs `null` explained](https://stackoverflow.com/questions/8609192/differentiate-null-true-blank-true-in-django))
-                - [x] If `CharField` or `TextField`, no need for `null=`.
+            - [x] nullability. ([`blank` vs `null` explained](https://stackoverflow.com/questions/8609192/differentiate-null-true-blank-true-in-django)) Does it make sense to not have a value in database for that field?
+                - [x] Exceptions: If `CharField` or `TextField`, no need for `null=`. Is forced to empty string if not specifying value.
             - [x] blank? required or not upon user input
             - [x] default?
                 - [x] uuid - use version 4. also set editable to `False`.
                 - [x] Django [Meta class](https://docs.djangoproject.com/en/2.1/topics/db/models/#meta-inheritance) for model inheritance, useful for setting default behaviors.
             - [x] max_length: only on `CharField`
+            - [ ] `on_delete` for all relational fields, including `OneToOne`, `ForeignKey` and `ManyToMany`.
+                - `on_delete=models.SET_NULL` often pairs with `null=True`; on the other hand `on_delete=models.CASCADE, null=False` pairs together.
             - [x] other attributes for special fields
+            - Refine models:
+                - [x] setup `def __str__(self)`.
+                - [x] specify [`class Meta`](https://docs.djangoproject.com/en/2.1/ref/models/options/#get-latest-by) if necessary.
+                - [ ] 🔥 🔥 🔥  any [optional arguments](https://docs.djangoproject.com/en/2.1/ref/models/fields/#help-text) for fields?
         - [ ] Maybe to better add all table at once before migration
     - [ ] Apply Django REST Framework.
     - [ ] Scale and build model for other table.
@@ -39,7 +46,7 @@ DevOps
 
 ### Data model
 
-![data model UML](docs/img/data-model-UML-03-03-v2.png)
+![data model UML](docs/img/data-model-UML-03-03-v3.png)
 
 ### Front End UI
 
@@ -65,6 +72,8 @@ Backend
 
 - `on_delete` [possible values](https://docs.djangoproject.com/en/2.1/ref/models/fields/).
 - [Django Countries](https://github.com/SmileyChris/django-countries), also check out the country object.
+- [Retrieve reverse foreign key lookup; retrieve latest / earliest.](https://stackoverflow.com/questions/51199214/django-filter-by-latest-with-reverse-foreign-key)
+    - Also see [Django model `class Meta` options](https://docs.djangoproject.com/en/2.1/ref/models/options/#get-latest-by).
 
 Overall
 
