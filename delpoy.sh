@@ -17,7 +17,7 @@ NEW_IMAGE_TAG=$(git rev-parse --short HEAD) && \
 echo "INFO: Git short hash is ${NEW_IMAGE_TAG}, we will use this as new image tag." && \
 source .env && echo "INFO: Sourced environment file." && \
 DOCKER_BUILD_RESULT=$(docker-compose build) || echo && \
-echo "Docker build result is ${DOCKER_BUILD_RESULT}" && \
+echo "Docker build result is -${DOCKER_BUILD_RESULT:-empty}-" && \
 docker tag "${AWS_ECR_NGINX_REPO_URI}:latest" "${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && echo "INFO: finish tagging ${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && \
 docker tag "${AWS_ECR_WEB_REPO_URI}:latest" "${AWS_ECR_WEB_REPO_URI}:${NEW_IMAGE_TAG}" && echo "INFO: finish tagging ${AWS_ECR_WEB_REPO_URI}:${NEW_IMAGE_TAG}" && \
 docker push "${AWS_ECR_NGINX_REPO_URI}:latest" && \

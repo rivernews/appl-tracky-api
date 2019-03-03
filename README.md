@@ -1,7 +1,44 @@
 # appl-tracky
 An Application Tracking System to help job finders ease their out-of-control spreadsheet use tracking every job application record.
 
-## Dev TODO list
+## Roadmap
+
+Back End
+
+- Build REST API
+    - [ ] 🔥 🔥 🔥 Test out database access. If one table can work, all table can work.
+        - [x] Create the `Company` table, and create required related tables.
+        - [x] Setup relationship
+        - Complete arguments for models:
+            - [ ] nullability
+            - [ ] blank?
+            - [ ] defaalt?
+            - [ ] max_length
+            - [ ] other attributes for special fields
+    - [ ] Apply Django REST Framework.
+    - [ ] Scale and build model for other table.
+- [ ] User authentication using social media service. How to integrate in Django and JWT?
+- [ ] Setup user permission control. Watch out JWT and session maintenance.
+
+Front End
+
+- [ ] Material UI: which library to use?
+- [ ] Scaffold React
+- [ ] Consider using Redux.
+
+DevOps
+
+- [ ] Set `ALLOWED_HOSTS` to secure in Django.
+- [ ] Can try container level health check, try `docker inspect ...` following the amazon trouble shopting article, try that in container's health check command.
+
+## Dev Notes
+
+Backend
+
+- `on_delete` [possible values](https://docs.djangoproject.com/en/2.1/ref/models/fields/).
+- [Django Countries](https://github.com/SmileyChris/django-countries), also check out the country object.
+
+Overall
 
 1. How to integrate React w/ Django? After we figure that out, we can start scaffolding our project.
     - [This tutorial](https://www.valentinog.com/blog/tutorial-api-django-rest-react/#Django_REST_with_React_Django_and_React_together) to set React's built src file under Django (or even the react project folder under django).
@@ -38,7 +75,7 @@ An Application Tracking System to help job finders ease their out-of-control spr
                         - Make sure you use the key name on EC2 when specifying the key pair, [not the local path](https://stackoverflow.com/questions/48471739/ecs-cli-key-pair-error-when-calling-up).
                         - [Full list of available parameters](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cmd-ecs-cli-up.html).
                         - Options that we didn't specify: `--security-group`, `--port`, `--vpc`, `--subnets` ...
-                    - 🔥 🔥 🔥 Create by docker compose
+                    - Create by docker compose
                         - [Setup environment secrets](https://medium.com/@felipgomesilva/using-secrets-in-aws-ecs-dc43c37ce4a1).
                         - Manually create ECR
                         - Manually create two repos on ECR, named `appl-tracky/nginx` and `appl-tracky/django`, this will be a one-time action.
