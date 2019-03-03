@@ -10,11 +10,15 @@ Back End
         - [x] Create the `Company` table, and create required related tables.
         - [x] Setup relationship
         - Complete arguments for models:
-            - [ ] nullability
-            - [ ] blank?
-            - [ ] defaalt?
-            - [ ] max_length
-            - [ ] other attributes for special fields
+            - [x] nullability. ([`blank` vs `null` explained](https://stackoverflow.com/questions/8609192/differentiate-null-true-blank-true-in-django))
+                - [x] If `CharField` or `TextField`, no need for `null=`.
+            - [x] blank? required or not upon user input
+            - [x] default?
+                - [x] uuid - use version 4. also set editable to `False`.
+                - [x] Django [Meta class](https://docs.djangoproject.com/en/2.1/topics/db/models/#meta-inheritance) for model inheritance, useful for setting default behaviors.
+            - [x] max_length: only on `CharField`
+            - [x] other attributes for special fields
+        - [ ] Maybe to better add all table at once before migration
     - [ ] Apply Django REST Framework.
     - [ ] Scale and build model for other table.
 - [ ] User authentication using social media service. How to integrate in Django and JWT?
@@ -31,7 +35,31 @@ DevOps
 - [ ] Set `ALLOWED_HOSTS` to secure in Django.
 - [ ] Can try container level health check, try `docker inspect ...` following the amazon trouble shopting article, try that in container's health check command.
 
-## Dev Notes
+## System Overview & Documentation
+
+### Data model
+
+![data model UML](docs/img/data-model-UML-03-03-v2.png)
+
+### Front End UI
+
+Home page outlining all applications.
+
+![Application List](docs/img/frontend/ApplicationList.png)
+
+Add a company to start registering applications for a company.
+
+![Application](docs/img/frontend/Application.png)
+
+Add updates to applications.
+
+![Company Application](docs/img/frontend/CompanyApplication.png)
+
+### Reflection for Frontend UI: 
+Is this easier to use than spreadsheet? The UI should make the registering process as quick as possible. If we split into too many steps and pages, it'll dramatically slow down the process.
+But sure, we're still not sure what is the best and what are the needs. We can always iterate the layout or process at a later point.
+
+## Other Dev Notes
 
 Backend
 
