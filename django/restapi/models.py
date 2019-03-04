@@ -30,14 +30,20 @@ class Company(ManagedBaseModel):
     @property
     def latest_ratings(self):
         return self.companyrating_set.filter(company=self).raw('''
-            SELECT p1.id, p1.name, p1.phone, p1.created
-            FROM person_person p1, (
-                SELECT source.text, value, MAX(sample_date) AS max_sampled
-                FROM restapi_company_rating
-                GROUP BY source.text
-            ) AS p2
-            WHERE p1.name = p2.name AND p1.created = p2.max_sampled
+            SELECT company_rating_table.*
+            FROM 
+                restapi_company_rating AS company_rating_table, 
+                (
+                    SELECT source.text, MAX(sample_date) AS max_sample_date
+                    FROM restapi_company_rating
+                    GROUP BY source.text
+                ) AS latest_ratings_table
+            WHERE company_rating_table.source.text = latest_ratings_table.source.text AND company_rating_table.sample_date = latest_ratings_table.max_sample_date
         ''')
+    
+    @property
+    def applications(self):
+        return self.application_set.all()
     
     def __str__(self):
         return self.name
@@ -102,6 +108,10 @@ class Application(ManagedBaseModel):
     def latest_status(self):
         return self.applicationstatus_set.latest()
     
+    @property
+    def statuses(self):
+        return self.applicationstatus_set.all()
+
     position_title = models.CharField(blank=False, max_length=150)
     @property
     def position_locations(self):

@@ -18,7 +18,7 @@ Back End
                 - [x] uuid - use version 4. also set editable to `False`.
                 - [x] Django [Meta class](https://docs.djangoproject.com/en/2.1/topics/db/models/#meta-inheritance) for model inheritance, useful for setting default behaviors.
             - [x] max_length: only on `CharField`
-            - [ ] `on_delete` for all relational fields, including `OneToOne`, `ForeignKey` and `ManyToMany`.
+            - [x] `on_delete` for all relational fields, including `OneToOne`, `ForeignKey` and `ManyToMany`.
                 - `on_delete=models.SET_NULL` often pairs with `null=True`; on the other hand `on_delete=models.CASCADE, null=False` pairs together.
             - [x] other attributes for special fields
             - Refine models:
@@ -148,6 +148,9 @@ Overall
     - Postgres: resetting things. [Default user and password are automatically set.](https://www.liquidweb.com/kb/what-is-the-default-password-for-postgresql/): default user is `postgres`, default password is `postgres`, default db name is `postgres`, default host url is `db`. If you want to change this, [follow this SO ](https://stackoverflow.com/q/46669759/9814131) by adding `POSTGRES_DB`, ..., etc. It'll automatically create the default database, username, ... by what you specify.
         - Connect to Postgres server by `docker-compose exec db psql db-name username`
 - Docker commands
+    - Danger: these two lines will wipe out everything in Docker on your local computer:
+        - [Stop all containers](https://linuxize.com/post/how-to-remove-docker-images-containers-volumes-and-networks/): `docker container stop $(docker container ls -aq)`
+        - Remove everything unused, including volumes: `docker system prune --volumes`.
     - List all volumes. `docker volume ls`.
     - Delete a named volume: `docker volume rm <volume name like appl-tracky-api_postgres_data>`
     - Build and turn on all: `docker-compose up -d --build`.

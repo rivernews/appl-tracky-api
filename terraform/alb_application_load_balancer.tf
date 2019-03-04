@@ -74,28 +74,6 @@ resource "aws_security_group" "public_alb" {
 #   }
 # }
 
-# https://www.terraform.io/docs/providers/aws/r/lb_target_group.html#health_check
-resource "aws_alb_target_group" "http" {
-  name     = "${var.project_name}-alb-tg-http"
-  port     = 80
-  protocol = "HTTP"
-
-  #   vpc_id   = "${module.new-vpc.vpc_id}"
-  vpc_id = "${var.vpc_id}"
-
-  health_check {
-      path = "/"
-      matcher = "200-299"
-      port = 80 # or "traffic-port" (default)
-      protocol = "HTTP" # default
-
-      interval = 20
-      timeout = 10
-      healthy_threshold = 2
-      unhealthy_threshold = 3
-  }
-}
-
 resource "aws_alb_listener" "https" {
   load_balancer_arn = "${aws_alb.main.id}"
   port              = "443"
@@ -107,6 +85,31 @@ resource "aws_alb_listener" "https" {
     # target_group_arn = "${aws_alb_target_group.https.id}"
     target_group_arn = "${aws_alb_target_group.http.id}"
     type             = "forward"
+  }
+}
+
+# https://www.terraform.io/docs/providers/aws/r/lb_target_group.html#health_check
+resource "aws_alb_target_group" "http" {
+  name     = "${var.project_name}-alb-tg-http"
+  port     = 80 # magic number
+  protocol = "HTTP" # magic number
+
+  #   vpc_id   = "${module.new-vpc.vpc_id}"
+  vpc_id = "${var.vpc_id}"
+
+  health_check {
+      path = "/"
+      matcher = "200-299"
+      port = "traffic-port" # necessary for using ALB's dynamic host port
+
+      interval = 20
+      timeout = 10
+      healthy_threshold = 2
+      unhealthy_threshold = 3
+  }
+
+  lifecycle {
+      create_before_destroy = true
   }
 }
 
