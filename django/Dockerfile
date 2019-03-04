@@ -6,11 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 EXPOSE 8000
 
-# set work directory
-WORKDIR /usr/src/django
-
 RUN echo Copying all stuff into container...
-COPY . /usr/src/django/
+RUN mkdir -p /usr/src/django
+WORKDIR /usr/src/django
+COPY . .
 
 # prepare db adapter dev env (psycopg2)
 RUN apk update \
@@ -32,7 +31,10 @@ RUN apk del build-deps
 # COPY . /usr/src/django/
 
 # run entrypoint.sh
-RUN echo In Dockerfile: chomd on entrypoint.sh
+# RUN echo In Dockerfile: chomd on entrypoint.sh
 # ENTRYPOINT ["chmod +x /usr/src/django/entrypoint.sh && /usr/src/django/entrypoint.sh"]
 # see https://stackoverflow.com/questions/29535015/error-cannot-start-container-stat-bin-sh-no-such-file-or-directory
-ENTRYPOINT ["/bin/sh","-c","chmod +x /usr/src/django/entrypoint.sh && /usr/src/django/entrypoint.sh"]
+# ENTRYPOINT ["/bin/sh","-c","chmod +x /usr/src/django/entrypoint.sh && /usr/src/django/entrypoint.sh"]
+ENTRYPOINT ["/usr/src/django/entrypoint.sh"]
+# CMD ["/bin/sh", "-c", "chmod +x /usr/src/django/entrypoint.sh && /usr/src/django/entrypoint.sh"]
+# CMD ["/bin/sh", "-c", "chmod +x entrypoint.sh && entrypoint.sh"]

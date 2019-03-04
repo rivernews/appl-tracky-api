@@ -1,0 +1,6 @@
+**/venv
+**/.git
+**/terraform
+**/docs
+**/*.sqlite3
+

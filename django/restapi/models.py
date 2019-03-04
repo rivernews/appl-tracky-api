@@ -16,11 +16,11 @@ class ManagedBaseModel(models.Model):
 # Create your models here.
 class Company(ManagedBaseModel):
     user = models.ForeignKey('User', on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated company or user input company
-    labels = models.ManyToManyField(Label, null=True)
+    labels = models.ManyToManyField('Label', blank=True)
 
     name = models.CharField(blank=False, max_length=100)
-    hq_location = models.OneToOneField(Address, on_delete=models.SET_NULL, null=True, blank=True)
-    home_page = models.OneToOneField(Link, on_delete=models.SET_NULL, null=True, blank=True)
+    hq_location = models.OneToOneField('Address', on_delete=models.SET_NULL, null=True, blank=True)
+    home_page = models.OneToOneField('Link', on_delete=models.SET_NULL, null=True, blank=True)
 
     @property
     def ratings(self):
@@ -53,9 +53,9 @@ class Company(ManagedBaseModel):
         unique_together = ("user", "name", "home_page")
 
 class CompanyRating(ManagedBaseModel):
-    source = models.OneToOneField(Link, on_delete=models.SET_NULL, null=True)
+    source = models.OneToOneField('Link', on_delete=models.SET_NULL, null=True)
     value = models.FloatField(null=False, blank=False, default=0.0)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=False)
+    company = models.ForeignKey('Company', on_delete=models.CASCADE, null=False)
     sample_date = models.DateField(null=False, blank=True, default=timezone.now)
 
     def __str__(self):
@@ -102,7 +102,7 @@ class Label(ManagedBaseModel):
 
 class Application(ManagedBaseModel):
     user = models.ForeignKey('User', on_delete=models.CASCADE, null=False)
-    user_company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True)
+    user_company = models.ForeignKey('Company', on_delete=models.CASCADE, null=True)
 
     @property
     def latest_status(self):
@@ -117,24 +117,24 @@ class Application(ManagedBaseModel):
     def position_locations(self):
         return self.positionlocation_set.all()
 
-    job_description_page = models.OneToOneField(Link, on_delete=models.SET_NULL, null=True, blank=True, help_text="The page describing qualifications and responsibilities of the position.")
-    source = models.OneToOneField(Link, on_delete=models.SET_NULL, null=True, blank=True, help_text="Specify where do you hear this position, e.g. Handshake, Linkedin, Glassdoor..., etc.")
+    job_description_page = models.OneToOneField('Link', related_name="job_description_page_application", on_delete=models.SET_NULL, null=True, blank=True, help_text="The page describing qualifications and responsibilities of the position.")
+    job_source = models.OneToOneField('Link', related_name="job_source_application", on_delete=models.SET_NULL, null=True, blank=True, help_text="Specify where do you hear this position, e.g. Handshake, Linkedin, Glassdoor..., etc.")
 
-    labels = models.ManyToManyField(Label, null=True, blank=True)
+    labels = models.ManyToManyField('Label', blank=True)
 
     def __str__(self):
         return self.position_title
 
 class PositionLocation(ManagedBaseModel):
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, null=False)
-    location = models.OneToOneField(Address, on_delete=models.CASCADE, null=False, blank=False)
+    application = models.ForeignKey('Application', on_delete=models.CASCADE, null=False)
+    location = models.OneToOneField('Address', on_delete=models.CASCADE, null=False, blank=False)
 
     def __str__(self):
         return str(self.location)
 
 class ApplicationStatus(ManagedBaseModel):
     text = models.CharField(blank=False, max_length=50)
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, null=True, blank=False) # null means this status is system pre-populated, instead of user input/defined.
+    application = models.ForeignKey('Application', on_delete=models.CASCADE, null=True, blank=False) # null means this status is system pre-populated, instead of user input/defined.
     date = models.DateField(null=True, blank=True, default=timezone.now, help_text="The date this status is updated. You can modify this field to reflect the correct date, especially when you create this status at a later point.")
     order = models.IntegerField(null=False, blank=True, default=0)
     
@@ -150,7 +150,7 @@ class ApplicationStatus(ManagedBaseModel):
         verbose_name_plural = "application statuses"
 
 class ApplicationStatusLink(ManagedBaseModel):
-    application_status = models.ForeignKey(ApplicationStatus, on_delete=models.CASCADE, null=False)
+    application_status = models.ForeignKey('ApplicationStatus', on_delete=models.CASCADE, null=False)
     link = models.OneToOneField(Link, on_delete=models.CASCADE, null=False, blank=False)
 
     def __str__(self):

@@ -10,9 +10,11 @@ Back End
         - [x] Create the `Company` table, and create required related tables.
         - [x] Setup relationships and fields. No need to fill in arguments yet.
             - **Change `OneToMany` to `ForeignKey`**: `OneToMany` relationship [should be implemented by `ForiegnKey`](https://stackoverflow.com/a/6929269/9814131), which is `ManyToOne`. So put the foreign key at the other side, then you can use reverse lookup to acheive `OneToMany`.
+            - In a model, if you have two fields using foreign key or one to one to point to external model, you have to specify argument `related_name` to avoid [reverse lookup crash](https://stackoverflow.com/questions/26955319/django-reverse-accessor-clashes/26955340).
         - Complete arguments for models:
             - [x] nullability. ([`blank` vs `null` explained](https://stackoverflow.com/questions/8609192/differentiate-null-true-blank-true-in-django)) Does it make sense to not have a value in database for that field?
                 - [x] Exceptions: If `CharField` or `TextField`, no need for `null=`. Is forced to empty string if not specifying value.
+                - Exception: `ManyToMany` cannot set `null=`, [no effect](https://stackoverflow.com/questions/18243039/migrating-manytomanyfield-to-null-true-blank-true-isnt-recognized).
             - [x] blank? required or not upon user input
             - [x] default?
                 - [x] uuid - use version 4. also set editable to `False`.
@@ -24,11 +26,13 @@ Back End
             - Refine models:
                 - [x] setup `def __str__(self)`.
                 - [x] specify [`class Meta`](https://docs.djangoproject.com/en/2.1/ref/models/options/#get-latest-by) if necessary.
-                - [ ] 🔥 🔥 🔥  any [optional arguments](https://docs.djangoproject.com/en/2.1/ref/models/fields/#help-text) for fields?
-        - [ ] Maybe to better add all table at once before migration
-    - [ ] Apply Django REST Framework.
-    - [ ] Scale and build model for other table.
+                - [x] Any [optional arguments](https://docs.djangoproject.com/en/2.1/ref/models/fields/#help-text) for fields?
+        - [x] Maybe to better add all table at once before migration
+- [ ] 🔥 🔥 🔥 Run `runserver`, resolve any issues reported.
+- [ ] Build custom user model, follow iriversland public's method.
+- [ ] Migration (or rebuild database if already built schema) apply to database. Test if it works fine?
 - [ ] User authentication using social media service. How to integrate in Django and JWT?
+- [ ] Apply Django REST Framework.
 - [ ] Setup user permission control. Watch out JWT and session maintenance.
 
 Front End

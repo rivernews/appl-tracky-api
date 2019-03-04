@@ -7,7 +7,6 @@ services:
     volumes:
       - global_static:/usr/src/django/global_static
     ports:
-      # - "1337:80"
       - "80:80"
       - "443:443"
     depends_on:
