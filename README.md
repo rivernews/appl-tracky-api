@@ -1,70 +1,90 @@
 # appl-tracky
 An Application Tracking System to help job finders ease their out-of-control spreadsheet use tracking every job application record.
 
-## Roadmap
+## Back End Roadmap
 
-Back End
+### Building Data Model & Database Design
 
-- Build REST API
-    - [ ] Test out database access. If one table can work, all table can work.
-        - [x] Create the `Company` table, and create required related tables.
-        - [x] Setup relationships and fields. No need to fill in arguments yet.
-            - **Change `OneToMany` to `ForeignKey`**: `OneToMany` relationship [should be implemented by `ForiegnKey`](https://stackoverflow.com/a/6929269/9814131), which is `ManyToOne`. So put the foreign key at the other side, then you can use reverse lookup to acheive `OneToMany`.
-            - In a model, if you have two fields using foreign key or one to one to point to external model, you have to specify argument `related_name` to avoid [reverse lookup crash](https://stackoverflow.com/questions/26955319/django-reverse-accessor-clashes/26955340).
-        - Complete arguments for models:
-            - [x] nullability. ([`blank` vs `null` explained](https://stackoverflow.com/questions/8609192/differentiate-null-true-blank-true-in-django)) Does it make sense to not have a value in database for that field?
-                - [x] Exceptions: If `CharField` or `TextField`, no need for `null=`. Is forced to empty string if not specifying value.
-                - Exception: `ManyToMany` cannot set `null=`, [no effect](https://stackoverflow.com/questions/18243039/migrating-manytomanyfield-to-null-true-blank-true-isnt-recognized).
-            - [x] blank? required or not upon user input
-            - [x] default?
-                - [x] uuid - use version 4. also set editable to `False`.
-                - [x] Django [Meta class](https://docs.djangoproject.com/en/2.1/topics/db/models/#meta-inheritance) for model inheritance, useful for setting default behaviors.
-            - [x] max_length: only on `CharField`
-            - [x] `on_delete` for all relational fields, including `OneToOne`, `ForeignKey` and `ManyToMany`.
-                - `on_delete=models.SET_NULL` often pairs with `null=True`; on the other hand `on_delete=models.CASCADE, null=False` pairs together.
-            - [x] other attributes for special fields
-            - Refine models:
-                - [x] setup `def __str__(self)`.
-                - [x] specify [`class Meta`](https://docs.djangoproject.com/en/2.1/ref/models/options/#get-latest-by) if necessary.
-                - [x] Any [optional arguments](https://docs.djangoproject.com/en/2.1/ref/models/fields/#help-text) for fields?
-        - [x] Maybe to better add all table at once before migration
+- [x] Create the `Company` table, and create required related tables.
+- [x] Setup relationships and fields. No need to fill in arguments yet.
+    - **Change `OneToMany` to `ForeignKey`**: `OneToMany` relationship [should be implemented by `ForiegnKey`](https://stackoverflow.com/a/6929269/9814131), which is `ManyToOne`. So put the foreign key at the other side, then you can use reverse lookup to acheive `OneToMany`.
+    - In a model, if you have two fields using foreign key or one to one to point to external model, you have to specify argument `related_name` to avoid [reverse lookup crash](https://stackoverflow.com/questions/26955319/django-reverse-accessor-clashes/26955340).
+- Complete arguments for models:
+    - [x] nullability. ([`blank` vs `null` explained](https://stackoverflow.com/questions/8609192/differentiate-null-true-blank-true-in-django)) Does it make sense to not have a value in database for that field?
+        - [x] Exceptions: If `CharField` or `TextField`, no need for `null=`. Is forced to empty string if not specifying value.
+        - Exception: `ManyToMany` cannot set `null=`, [no effect](https://stackoverflow.com/questions/18243039/migrating-manytomanyfield-to-null-true-blank-true-isnt-recognized).
+    - [x] blank? required or not upon user input
+    - [x] default?
+        - [x] uuid - use version 4. also set editable to `False`.
+        - [x] Django [Meta class](https://docs.djangoproject.com/en/2.1/topics/db/models/#meta-inheritance) for model inheritance, useful for setting default behaviors.
+    - [x] max_length: only on `CharField`
+    - [x] `on_delete` for all relational fields, including `OneToOne`, `ForeignKey` and `ManyToMany`.
+        - `on_delete=models.SET_NULL` often pairs with `null=True`; on the other hand `on_delete=models.CASCADE, null=False` pairs together.
+    - [x] other attributes for special fields
+    - Refine models:
+        - [x] setup `def __str__(self)`.
+        - [x] specify [`class Meta`](https://docs.djangoproject.com/en/2.1/ref/models/options/#get-latest-by) if necessary.
+        - [x] Any [optional arguments](https://docs.djangoproject.com/en/2.1/ref/models/fields/#help-text) for fields?
+- [x] Maybe to better add all table at once before migration
 - [x] Build custom user model, follow iriversland public's method.
     - Admin will use only username, and a placeholder email. Admin test account will use Gmail.
-- [x] Run `runserver`, resolve any issues reported.⭕️
+- [x] Run `runserver`, resolve any issues reported.
 - [x] Migration (or rebuild database if already built schema) apply to database. Test if it works fine?
     - Create a super user.
 - [x] Run `runserver`, resolve any issues reported.
     - Check out admin page.
-- [ ] User authentication using social media service. How to integrate in Django and JWT?
-    - Choosing a technology stack:
-        - SPA => <= [JWT](https://github.com/davesque/django-rest-framework-simplejwt) + social auth (not yet support simplejwt, PRed) + DRF + Django 2.1
-        - SPA => <= [JWT](https://github.com/GetBlimp/django-rest-framework-jwt) + [social auth](https://github.com/st4lk/django-rest-social-auth) + DRF <= 3.9 + Django <= 1.11(jwt) ✅
-            - Will have to revert Django to 1.11 and Python to 3.6. But backend should be stable and we can always upgrade it at a later point.
-            - 🔥 🔥 🔥 In order to go from Django 2.0 to 1.11, we need to...
-                - `urls.py` path => url
-        - SPA =>?<= KNOX + DRF + social auth + Django 2.1
+    - Done!
 
-- [ ] Apply Django REST Framework.
+### Setup REST API & Social Auth
+
+- [x] User authentication using social media service. How to integrate in Django and JWT? Choosing a technology stack:
+    - SPA => <= [JWT](https://github.com/davesque/django-rest-framework-simplejwt) + social auth (not yet support simplejwt, PRed) + DRF + Django 2.1
+    - **SPA => <= [JWT](https://github.com/GetBlimp/django-rest-framework-jwt) + [social auth](https://github.com/st4lk/django-rest-social-auth) + DRF <= 3.9 + Django <= 1.11(due to jwt) ✅**
+        - Will have to revert Django to 1.11 and Python to 3.6. But backend should be stable and we can always upgrade it at a later point.
+    - SPA =>?<= KNOX + DRF + social auth + Django 2.1
+- In order to apply the tech stack, we need to:
+    - [x] Downgrade django to 1.11 (literally re-create django project)
+    - [ ] 🔥 🔥 🔥 Integrate w/ DRF (Django REST Framework)
+    - [ ] Integrate w/ jwt
+    - [ ] Integrate w/ social auth, test it out using your own account!
+    - [ ] Test login from frontend, setup corresponding backend.
+    - [ ] Test register/login/logout from frontend, setup corresponding backend.
+- [x] Downgrade django to 1.11
+    - Re-create venv, install dependencies
+    - Django startproject
+    - Django startapp api
+    - settings: add custom model, add credentials like secret key, set conditional DEBUG, modify db to use postgres from env var, allow host set wild card fir debug use first, add api into app list.
+    - Create `urls.py`, view and template for a home page.
+        - `urls.py`: In Django 1.11, instead of `path()` => `url(r'^...')`.
+    - Test the home page by `runserver`.
+    - Add all models.
+    - Test the models by `runserver`, don't apply `migrate` yet. Resolve any error except `ValueError: Dependency on app with no migrations: api`.
+    - Make sure you don't have error other than those related to migration. Now migrate the app.
+        - Also create super user.
+    - Now `runserver` and check if you can login to `/admin` w/o error.
+    - Setup `admin.py`. Now test if you can view all tables in `/admin`.
+    - Done!
+
 - [ ] Setup user permission control. Watch out JWT and session maintenance.
 
-Front End
+## Front End Roadmap
 
 - [ ] Material UI: which library to use?
 - [ ] Scaffold React
 - [ ] Consider using Redux.
 
-DevOps
+## DevOps Roadmap
 
 - [ ] Set `ALLOWED_HOSTS` to secure in Django.
 - [ ] Can try container level health check, try `docker inspect ...` following the amazon trouble shopting article, try that in container's health check command.
 
-## System Overview & Documentation
+# System Design Overview
 
-### Data model
+## Data model
 
 ![data model UML](docs/img/data-model-UML-03-03-v3.png)
 
-### Front End UI
+## Front End UI
 
 Home page outlining all applications.
 
@@ -78,7 +98,8 @@ Add updates to applications.
 
 ![Company Application](docs/img/frontend/CompanyApplication.png)
 
-### Reflection for Frontend UI: 
+## Reflection for Frontend UI: 
+
 Is this easier to use than spreadsheet? The UI should make the registering process as quick as possible. If we split into too many steps and pages, it'll dramatically slow down the process.
 But sure, we're still not sure what is the best and what are the needs. We can always iterate the layout or process at a later point.
 

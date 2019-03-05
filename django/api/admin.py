@@ -2,7 +2,7 @@
 from django.contrib import admin
 
 from django.contrib.auth.admin import UserAdmin
-from restapi.models import (
+from api.models import (
     CustomUser, Company, CompanyRating,
     Application, PositionLocation, ApplicationStatus, ApplicationStatusLink,
     Address, Link, Label,
@@ -51,4 +51,3 @@ class LinkAdmin(admin.ModelAdmin):
 @admin.register(Label)
 class LabelAdmin(admin.ModelAdmin):
     list_display = get_all_model_fields(Label)
-

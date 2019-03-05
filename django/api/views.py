@@ -3,4 +3,4 @@ from django.views.generic import TemplateView
 
 # Create your views here.
 class ApiHomeView(TemplateView):
-    template_name = 'restapi/restapi-index.html'
+    template_name = 'api/api-index.html'

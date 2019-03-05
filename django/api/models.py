@@ -8,6 +8,8 @@ from django.utils import timezone
 
 class CustomUser(AbstractUser):
     # add additional fields in here
+    uuid = models.UUIDField(null=False, default=uuid.uuid4, editable=False)
+
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name'] # will prompt these when do createsuperuser
 
     def __init__(self, *args, **kwargs):
@@ -47,17 +49,17 @@ class Company(ManagedBaseModel):
     # https://stackoverflow.com/questions/7020313/filtering-django-query-by-the-record-with-the-maximum-column-value
     @property
     def latest_ratings(self):
-        return self.companyrating_set.filter(company=self).raw('''
+        return self.companyrating_set.filter(company=self).raw(f'''
             SELECT company_rating_table.*
             FROM 
-                restapi_company_rating AS company_rating_table, 
+                %s AS company_rating_table, 
                 (
                     SELECT source.text, MAX(sample_date) AS max_sample_date
-                    FROM restapi_company_rating
+                    FROM %s
                     GROUP BY source.text
                 ) AS latest_ratings_table
             WHERE company_rating_table.source.text = latest_ratings_table.source.text AND company_rating_table.sample_date = latest_ratings_table.max_sample_date
-        ''')
+        ''', [CompanyRating.objects.model._meta.db_table] * 2) # https://stackoverflow.com/questions/23404551/django-get-table-name-of-a-model-in-the-model-manager/23405140
     
     @property
     def applications(self):
