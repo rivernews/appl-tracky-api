@@ -1,6 +1,24 @@
 import uuid
+
 from django.db import models
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
+
 from django.utils import timezone
+
+class CustomUser(AbstractUser):
+    # add additional fields in here
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name'] # will prompt these when do createsuperuser
+
+    def __init__(self, *args, **kwargs):
+        self._meta.get_field('email').blank = False # alter the value in AbstractUser w/o additional settings: https://stackoverflow.com/questions/45722025/forcing-unique-email-address-during-registration-with-django
+        self._meta.get_field('email')._unique = True
+        self._meta.get_field('first_name').blank = False
+        self._meta.get_field('last_name').blank = False
+        super(CustomUser, self).__init__(*args, **kwargs)
+    
+    def __str__(self):
+        return self.email
 
 class ManagedBaseModel(models.Model):
     uuid = models.UUIDField(null=False, default=uuid.uuid4, editable=False)
@@ -15,7 +33,7 @@ class ManagedBaseModel(models.Model):
 
 # Create your models here.
 class Company(ManagedBaseModel):
-    user = models.ForeignKey('User', on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated company or user input company
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated company or user input company
     labels = models.ManyToManyField('Label', blank=True)
 
     name = models.CharField(blank=False, max_length=100)
@@ -78,7 +96,7 @@ class Address(ManagedBaseModel):
 
 class Link(ManagedBaseModel):
     text = models.CharField(blank=False, max_length=200)
-    user = models.ForeignKey('User', on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated link or user input link
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated link or user input link
     url = models.URLField(null=False, blank=False)
     order = models.IntegerField(null=True, blank=True, default=0)
 
@@ -89,7 +107,7 @@ class Link(ManagedBaseModel):
         ordering = ['-order', 'text']
 
 class Label(ManagedBaseModel):
-    user = models.ForeignKey('User', on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated label or user input label
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated label or user input label
     text = models.CharField(blank=False, max_length=200)
     color = models.CharField(blank=True, max_length=20)
     order = models.IntegerField(null=False, blank=True, default=0)
@@ -101,7 +119,7 @@ class Label(ManagedBaseModel):
         ordering = ['-order', 'text']
 
 class Application(ManagedBaseModel):
-    user = models.ForeignKey('User', on_delete=models.CASCADE, null=False)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=False)
     user_company = models.ForeignKey('Company', on_delete=models.CASCADE, null=True)
 
     @property

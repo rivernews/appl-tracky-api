@@ -28,9 +28,13 @@ Back End
                 - [x] specify [`class Meta`](https://docs.djangoproject.com/en/2.1/ref/models/options/#get-latest-by) if necessary.
                 - [x] Any [optional arguments](https://docs.djangoproject.com/en/2.1/ref/models/fields/#help-text) for fields?
         - [x] Maybe to better add all table at once before migration
-- [ ] 🔥 🔥 🔥 Run `runserver`, resolve any issues reported.
-- [ ] Build custom user model, follow iriversland public's method.
-- [ ] Migration (or rebuild database if already built schema) apply to database. Test if it works fine?
+- [x]  🔥 🔥 🔥 Build custom user model, follow iriversland public's method.
+    - Admin will use only username, and a placeholder email. Admin test account will use Gmail.
+- [x] Run `runserver`, resolve any issues reported.⭕️
+- [x] Migration (or rebuild database if already built schema) apply to database. Test if it works fine?
+    - Create a super user.
+- [x] Run `runserver`, resolve any issues reported.
+    - Check out admin page.
 - [ ] User authentication using social media service. How to integrate in Django and JWT?
 - [ ] Apply Django REST Framework.
 - [ ] Setup user permission control. Watch out JWT and session maintenance.

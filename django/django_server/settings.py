@@ -130,3 +130,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'global_static')
+
+AUTH_USER_MODEL = 'restapi.CustomUser'
