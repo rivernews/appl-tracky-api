@@ -28,7 +28,7 @@ Back End
                 - [x] specify [`class Meta`](https://docs.djangoproject.com/en/2.1/ref/models/options/#get-latest-by) if necessary.
                 - [x] Any [optional arguments](https://docs.djangoproject.com/en/2.1/ref/models/fields/#help-text) for fields?
         - [x] Maybe to better add all table at once before migration
-- [x]  🔥 🔥 🔥 Build custom user model, follow iriversland public's method.
+- [x] Build custom user model, follow iriversland public's method.
     - Admin will use only username, and a placeholder email. Admin test account will use Gmail.
 - [x] Run `runserver`, resolve any issues reported.⭕️
 - [x] Migration (or rebuild database if already built schema) apply to database. Test if it works fine?
@@ -36,6 +36,14 @@ Back End
 - [x] Run `runserver`, resolve any issues reported.
     - Check out admin page.
 - [ ] User authentication using social media service. How to integrate in Django and JWT?
+    - Choosing a technology stack:
+        - SPA => <= [JWT](https://github.com/davesque/django-rest-framework-simplejwt) + social auth (not yet support simplejwt, PRed) + DRF + Django 2.1
+        - SPA => <= [JWT](https://github.com/GetBlimp/django-rest-framework-jwt) + [social auth](https://github.com/st4lk/django-rest-social-auth) + DRF <= 3.9 + Django <= 1.11(jwt) ✅
+            - Will have to revert Django to 1.11 and Python to 3.6. But backend should be stable and we can always upgrade it at a later point.
+            - 🔥 🔥 🔥 In order to go from Django 2.0 to 1.11, we need to...
+                - `urls.py` path => url
+        - SPA =>?<= KNOX + DRF + social auth + Django 2.1
+
 - [ ] Apply Django REST Framework.
 - [ ] Setup user permission control. Watch out JWT and session maintenance.
 
