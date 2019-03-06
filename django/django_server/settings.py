@@ -140,8 +140,20 @@ AUTH_USER_MODEL = 'api.CustomUser'
 # REST framework settings
 # https://www.django-rest-framework.org/tutorial/quickstart/#pagination
 REST_FRAMEWORK = {
+    # Scalability - pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+
+    # Security - throttling
+    # https://www.django-rest-framework.org/api-guide/throttling/
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle', # for unauthenticated users; use IP address to identify
+        'rest_framework.throttling.UserRateThrottle' # identify by user id
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '20/min',
+        'user': '60/min'
+    },
     
     # JWT settings
     # http://getblimp.github.io/django-rest-framework-jwt/

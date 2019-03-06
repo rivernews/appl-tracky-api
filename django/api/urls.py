@@ -12,7 +12,7 @@ router.register(r'groups', views.GroupViewSet)
 
 urlpatterns = [
     # Django views
-    url(r'^$', views.ApiHomeView.as_view(), name='api-homepage'),
+    url(r'^home/$', views.ApiHomeView.as_view(), name='api-homepage'),
 
     # API endpoints
     url(r'^', include(router.urls)),

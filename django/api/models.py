@@ -21,6 +21,9 @@ class CustomUser(AbstractUser):
     
     def __str__(self):
         return self.email
+    
+    class Meta:
+        ordering = ['-date_joined', 'first_name', 'last_name']
 
 class ManagedBaseModel(models.Model):
     uuid = models.UUIDField(null=False, default=uuid.uuid4, editable=False)

@@ -2,9 +2,15 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import (
+    Group,
+
+)
 from rest_framework import viewsets
-from .serializers import UserSerializer, GroupSerializer
+from .serializers import (
+    UserSerializer, GroupSerializer,
+    
+)
 
 # Create your views here.
 class ApiHomeView(TemplateView):
@@ -21,6 +27,12 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = get_user_model().objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
+
+    def get_queryset(self):
+        if not self.request.user.is_superuser:
+            return get_user_model().objects.filter(uuid=self.request.user.uuid)
+        else:
+            return get_user_model().objects.all().order_by('-date_joined')
 
 
 class GroupViewSet(viewsets.ModelViewSet):

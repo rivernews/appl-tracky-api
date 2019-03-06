@@ -74,9 +74,14 @@ An Application Tracking System to help job finders ease their out-of-control spr
 - [x] Setup social auth
     - Create developer ids in [Google console](https://console.developers.google.com).
 - Setup user permission control. Watch out JWT and session maintenance.
-    - [ ] 🔥 🔥 🔥Setup requesting objects in frontend. Then apply permission and see if it can make a difference. (if has permission - can read; if not like other's private object, reject the request)
-        - Setup mock data in backend if necessary.
-- [ ] Setup up CRUD endpoint for all tables.
+    - 🔥 🔥 🔥Setup requesting objects in frontend. Then apply permission and see if it can make a difference. (if has permission - can read; if not like other's private object, reject the request) Setup mock data in backend if necessary.
+        - Implement permission in DRF
+            - [x] Read in CRUD: we can easily achieve permission by filtering in view level. Can't read object outside of filtered results. Note this case will get a 404 not found instead of permission denied.
+            - [ ] How about create/delete/udpate? And how can we test it?
+        - Frontend basic - login/logout/username UI
+        - Frontend Read request on 1) self 2) other private. Test if backend permission is working.
+- [ ] Setup up CRUD endpoint + permission for all tables.
+    - When you add new table, use this order: Serializer -->  viewset --> routes.
 - [ ] REST API DONE.
 
 ## Front End Roadmap
