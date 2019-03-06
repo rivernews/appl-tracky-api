@@ -76,6 +76,8 @@ An Application Tracking System to help job finders ease their out-of-control spr
 - Setup user permission control. Watch out JWT and session maintenance.
     - [ ] 🔥 🔥 🔥Setup requesting objects in frontend. Then apply permission and see if it can make a difference. (if has permission - can read; if not like other's private object, reject the request)
         - Setup mock data in backend if necessary.
+- [ ] Setup up CRUD endpoint for all tables.
+- [ ] REST API DONE.
 
 ## Front End Roadmap
 
