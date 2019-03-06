@@ -37,6 +37,7 @@ An Application Tracking System to help job finders ease their out-of-control spr
 
 ### Setup REST API & Social Auth
 
+- [x] Make sure you setup `CORS` in Django's `settins.py`! Also refer to [this code](https://github.com/opmftw/react-django-oauth2-example/blob/master/backend/clear_dj/settings.py) to allow CORS.
 - [x] User authentication using social media service. How to integrate in Django and JWT? Choosing a technology stack:
     - SPA => <= [JWT](https://github.com/davesque/django-rest-framework-simplejwt) + social auth (not yet support simplejwt, PRed) + DRF + Django 2.1
     - **SPA => <= [JWT](https://github.com/GetBlimp/django-rest-framework-jwt) + [social auth](https://github.com/st4lk/django-rest-social-auth) + DRF <= 3.9 + Django <= 1.11(due to jwt) ✅**
@@ -44,8 +45,8 @@ An Application Tracking System to help job finders ease their out-of-control spr
     - SPA =>?<= KNOX + DRF + social auth + Django 2.1
 - In order to apply the tech stack, we need to:
     - [x] Downgrade django to 1.11 (literally re-create django project)
-    - [ ] 🔥 🔥 🔥 Integrate w/ DRF (Django REST Framework)
-    - [ ] Integrate w/ jwt
+    - [x] Integrate w/ DRF (Django REST Framework)
+    - [x] Integrate w/ jwt
     - [ ] Integrate w/ social auth, test it out using your own account!
     - [ ] Test login from frontend, setup corresponding backend.
     - [ ] Test register/login/logout from frontend, setup corresponding backend.
@@ -64,19 +65,38 @@ An Application Tracking System to help job finders ease their out-of-control spr
     - Now `runserver` and check if you can login to `/admin` w/o error.
     - Setup `admin.py`. Now test if you can view all tables in `/admin`.
     - Done!
-
-- [ ] Setup user permission control. Watch out JWT and session maintenance.
+- CRUD by DRF
+    - [Setup RESTful framework](https://github.com/rivernews/djangorest-angularcli-eb-seed#setup-restful-framework), or better follow the [Official DRF quickstart](https://www.django-rest-framework.org/tutorial/quickstart/#pagination), cuz they provide more topics including pagination there.
+- Setup JWT
+    - [Setup endpoint](http://getblimp.github.io/django-rest-framework-jwt/).
+    - [Follow the setup for Django social auth](https://github.com/st4lk/django-rest-social-auth).
+        - See an example from [Medium 2017](https://medium.com/@alexanderleon/implement-social-authentication-with-react-restful-api-9b44f4714fa) and [Medium 2018](https://medium.com/trabe/oauth-authentication-in-django-with-social-auth-c67a002479c1), also a [github repo demo Django social auth google](https://github.com/opmftw/react-django-oauth2-example).
+- [x] Setup social auth
+    - Create developer ids in [Google console](https://console.developers.google.com).
+- Setup user permission control. Watch out JWT and session maintenance.
+    - [ ] 🔥 🔥 🔥Setup requesting objects in frontend. Then apply permission and see if it can make a difference. (if has permission - can read; if not like other's private object, reject the request)
+        - Setup mock data in backend if necessary.
 
 ## Front End Roadmap
 
+- Social Auth
+    - [x] Make a social auth request to [obtain the `code`](https://github.com/anthonyjgrove/react-google-login).
+    - [x] `POST` this `code` to the Django API. Make sure you follow [the format](https://github.com/st4lk/django-rest-social-auth#quick-start), i.e., pass in both `provider` and `code`.
+    - [x] Debug on redirect uri mismatch problem.
+        - [`django-rest-social-auth`](https://github.com/st4lk/django-rest-social-auth#quick-start) on redirect setting, but seems like this is just frontend side? Says the fronend can send a `redirect_uri` when requesting JWT, and will force to use that.
+        - [Frontend `react-google-login`](https://github.com/anthonyjgrove/react-google-login).
+        - [Solved the redirect url mismatch error and we posted a SO answer!](https://stackoverflow.com/a/55015226/9814131)
 - [ ] Material UI: which library to use?
-- [ ] Scaffold React
+- [x] Scaffold React
 - [ ] Consider using Redux.
 
 ## DevOps Roadmap
 
-- [ ] Set `ALLOWED_HOSTS` to secure in Django.
+- [ ] Restrict `ALLOWED_HOSTS` to secure in Django.
 - [ ] Can try container level health check, try `docker inspect ...` following the amazon trouble shopting article, try that in container's health check command.
+- [ ] Store social auth credentials in AWS, setup task def to use them, and include it in docker image.
+    - [ ] Add authorized URL in [Google Developer Console](https://console.developers.google.com/) if necessary. (See if your social auth result is valid on production server)
+    - [ ] Restrict `CORS` settings in Django.
 
 # System Design Overview
 

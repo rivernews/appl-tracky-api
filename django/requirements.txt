@@ -2,3 +2,17 @@ django >= 1.0,<2.0
 psycopg2 >= 2.0,<3.0
 gunicorn == 19.9.0
 awscli
+
+
+djangorestframework==3.9.0
+django-cors-headers==2.4.0
+djangorestframework-jwt >= 1.11,<1.12
+
+rest-social-auth < 2.1
+
+# REST Social Auth dependencies: https://github.com/st4lk/django-rest-social-auth
+social-auth-core >=3.0, <4.0
+social-auth-app-django >=3.1, <4.0
+
+# Dev
+autopep8
