@@ -8,7 +8,7 @@ from django.utils import timezone
 
 class CustomUser(AbstractUser):
     # add additional fields in here
-    uuid = models.UUIDField(null=False, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(primary_key=True, null=False, default=uuid.uuid4, editable=False)
 
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name'] # will prompt these when do createsuperuser
 
@@ -26,7 +26,7 @@ class CustomUser(AbstractUser):
         ordering = ['-date_joined', 'first_name', 'last_name']
 
 class ManagedBaseModel(models.Model):
-    uuid = models.UUIDField(null=False, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(primary_key=True, null=False, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
@@ -90,11 +90,11 @@ class Address(ManagedBaseModel):
     state = models.CharField(blank=True, max_length=50)
     city = models.CharField(blank=True, max_length=50)
     street = models.CharField(blank=True, max_length=150)
-    raw_address = models.CharField(blank=True, max_length=200)
+    full_address = models.CharField(blank=True, max_length=200, help_text="The full address if the form does not apply for your address.")
     zipcode = models.CharField(blank=True, max_length=20)
 
     def __str__(self):
-        return self.place_name or self.raw_address
+        return self.place_name or self.full_address
     
     class Meta:
         verbose_name_plural = "addresses"

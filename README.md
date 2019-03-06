@@ -47,9 +47,9 @@ An Application Tracking System to help job finders ease their out-of-control spr
     - [x] Downgrade django to 1.11 (literally re-create django project)
     - [x] Integrate w/ DRF (Django REST Framework)
     - [x] Integrate w/ jwt
-    - [ ] Integrate w/ social auth, test it out using your own account!
-    - [ ] Test login from frontend, setup corresponding backend.
-    - [ ] Test register/login/logout from frontend, setup corresponding backend.
+    - [x] Integrate w/ social auth, test it out using your own account!
+    - [x] Test login from frontend, setup corresponding backend.
+    - [x] Test register/login/logout from frontend, setup corresponding backend.
 - [x] Downgrade django to 1.11
     - Re-create venv, install dependencies
     - Django startproject
@@ -67,6 +67,13 @@ An Application Tracking System to help job finders ease their out-of-control spr
     - Done!
 - CRUD by DRF
     - [Setup RESTful framework](https://github.com/rivernews/djangorest-angularcli-eb-seed#setup-restful-framework), or better follow the [Official DRF quickstart](https://www.django-rest-framework.org/tutorial/quickstart/#pagination), cuz they provide more topics including pagination there.
+- [x] Set `uuid` as primary key for all tables.
+    - Reset database: 1) delete database 2) delete all `migration.py` in each django app. 3) `runserver`, test any other issue 4) `makemigrations && migrate` 5) `createsuperuser`. 6) `runserver` & `/admin` login to test.
+    - Test will CRUD still work for DRF?
+        - [x] Read: can control in `viewset`.
+        - [x] Create: done by POST, but need to be authenticated. Default will deny for anonymous user.
+        - [x] Update: has to enable PATCH. How? In url specify the uuid. (You can't use PATCH on the List endpoint)
+        - [x] Delete: need to enable DELETE. How? Same as Update.
 - Setup JWT
     - [Setup endpoint](http://getblimp.github.io/django-rest-framework-jwt/).
     - [Follow the setup for Django social auth](https://github.com/st4lk/django-rest-social-auth).
@@ -74,14 +81,18 @@ An Application Tracking System to help job finders ease their out-of-control spr
 - [x] Setup social auth
     - Create developer ids in [Google console](https://console.developers.google.com).
 - Setup user permission control. Watch out JWT and session maintenance.
-    - 🔥 🔥 🔥Setup requesting objects in frontend. Then apply permission and see if it can make a difference. (if has permission - can read; if not like other's private object, reject the request) Setup mock data in backend if necessary.
+    - Setup requesting objects in frontend. Then apply permission and see if it can make a difference. (if has permission - can read; if not like other's private object, reject the request) Setup mock data in backend if necessary.
         - Implement permission in DRF
             - [x] Read in CRUD: we can easily achieve permission by filtering in view level. Can't read object outside of filtered results. Note this case will get a 404 not found instead of permission denied.
-            - [ ] How about create/delete/udpate? And how can we test it?
-        - Frontend basic - login/logout/username UI
-        - Frontend Read request on 1) self 2) other private. Test if backend permission is working.
-- [ ] Setup up CRUD endpoint + permission for all tables.
-    - When you add new table, use this order: Serializer -->  viewset --> routes.
+            - How about create/delete/udpate? And how can we test it?
+                - [x] create the "Address" table & REST endpoint --> "Address" is easier since it has no foreign key. (we have to deal with Many To Many field later...)
+- [ ] 🔥 🔥 🔥Setup up CRUD endpoint + permission for all tables.
+    - When you add new table, use this order: **Serializer -->  viewset --> routes**.
+    - [ ] **General permission policy:**
+        - If anonymous user: can only read objects w/o an `.user` property, or objects w/ `.user==None/null`
+            - [ ] Add `user` attribute to model to protect private data if necessary.
+        - If regular user: can read objects allowed for anonymous user, plus objects w/ `.user==themselves`
+        - If admin: can read all objects w/o restrictions.
 - [ ] REST API DONE.
 
 ## Front End Roadmap
@@ -93,9 +104,7 @@ An Application Tracking System to help job finders ease their out-of-control spr
         - [`django-rest-social-auth`](https://github.com/st4lk/django-rest-social-auth#quick-start) on redirect setting, but seems like this is just frontend side? Says the fronend can send a `redirect_uri` when requesting JWT, and will force to use that.
         - [Frontend `react-google-login`](https://github.com/anthonyjgrove/react-google-login).
         - [Solved the redirect url mismatch error and we posted a SO answer!](https://stackoverflow.com/a/55015226/9814131)
-- [ ] Material UI: which library to use?
-- [x] Scaffold React
-- [ ] Consider using Redux.
+- [Handoff to frontend repo](https://github.com/rivernews/appl-tracky-spa)
 
 ## DevOps Roadmap
 
@@ -110,25 +119,6 @@ An Application Tracking System to help job finders ease their out-of-control spr
 ## Data model
 
 ![data model UML](docs/img/data-model-UML-03-03-v3.png)
-
-## Front End UI
-
-Home page outlining all applications.
-
-![Application List](docs/img/frontend/ApplicationList.png)
-
-Add a company to start registering applications for a company.
-
-![Application](docs/img/frontend/Application.png)
-
-Add updates to applications.
-
-![Company Application](docs/img/frontend/CompanyApplication.png)
-
-## Reflection for Frontend UI: 
-
-Is this easier to use than spreadsheet? The UI should make the registering process as quick as possible. If we split into too many steps and pages, it'll dramatically slow down the process.
-But sure, we're still not sure what is the best and what are the needs. We can always iterate the layout or process at a later point.
 
 ## Other Dev Notes
 
