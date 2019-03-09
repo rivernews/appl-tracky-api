@@ -17,11 +17,13 @@ urlpatterns = [
 
     # API endpoints
     url(r'^', include(router.urls)),
+    
     # social auth endpoints
-    url(r'^api/login/', include('rest_social_auth.urls_jwt')),
+    # https://github.com/st4lk/django-rest-social-auth/blob/master/rest_social_auth/urls_jwt.py
+    url(r'^login/social/$', views.SocialAuthView.as_view(), name='login_social_jwt_user'),
 
     # login URLs for the browsable API.
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^login/', include('rest_framework.urls', namespace='rest_framework')),
     
     # JWT token endpoint
     url(r'^api-token-auth/', obtain_jwt_token),

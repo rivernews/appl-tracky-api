@@ -8,8 +8,9 @@ from .models import (
 )
 
 from rest_framework import viewsets
+from rest_social_auth.views import SocialJWTUserAuthView
 from .serializers import (
-    UserSerializer, GroupSerializer,
+    UserSerializer, SocialAuthUserSerializer, GroupSerializer,
     AddressSerializer
 )
 
@@ -39,6 +40,10 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             # admin user
             return get_user_model().objects.all().order_by('-date_joined')
+
+
+class SocialAuthView(SocialJWTUserAuthView):
+      serializer_class = SocialAuthUserSerializer
 
 
 class GroupViewSet(viewsets.ModelViewSet):

@@ -89,10 +89,16 @@ An Application Tracking System to help job finders ease their out-of-control spr
 - [ ] 🔥 🔥 🔥Setup up CRUD endpoint + permission for all tables.
     - When you add new table, use this order: **Serializer -->  viewset --> routes**.
     - [ ] **General permission policy:**
-        - If anonymous user: can only read objects w/o an `.user` property, or objects w/ `.user==None/null`
-            - [ ] Add `user` attribute to model to protect private data if necessary.
-        - If regular user: can read objects allowed for anonymous user, plus objects w/ `.user==themselves`
-        - If admin: can read all objects w/o restrictions.
+        - Level of permssions
+            - X: cannot access the entire API at all. 
+            - A: can only read objects w/o an `.user` property, or objects w/ `.user==None/null`
+                - [ ] Add `user` attribute to model to protect private data if necessary.
+            - B: can read objects allowed for anonymous user, plus objects w/ `.user==themselves`
+            - C: can read all objects w/o restrictions.
+        - Policies
+            - If anonymous user: level X
+            - If regular user: level A+B
+            - If admin: level A+B+C
 - [ ] REST API DONE.
 
 ## Front End Roadmap
@@ -128,6 +134,7 @@ Backend
 - [Django Countries](https://github.com/SmileyChris/django-countries), also check out the country object.
 - [Retrieve reverse foreign key lookup; retrieve latest / earliest.](https://stackoverflow.com/questions/51199214/django-filter-by-latest-with-reverse-foreign-key)
     - Also see [Django model `class Meta` options](https://docs.djangoproject.com/en/2.1/ref/models/options/#get-latest-by).
+- [Create super user - the first user - in production environment](https://stackoverflow.com/questions/30027203/create-django-super-user-in-a-docker-container-without-inputting-password).
 
 Overall
 

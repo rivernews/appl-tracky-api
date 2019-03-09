@@ -4,12 +4,25 @@ from .models import (
     Address
 )
 from rest_framework import serializers
+from rest_social_auth.serializers import UserJWTSerializer
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    For general API endpoint
+    """
     class Meta:
         model = get_user_model()
-        fields = ('url', 'username', 'email', 'groups')
+        fields = ('url', 'email', 'first_name', 'last_name')
+
+
+class SocialAuthUserSerializer(UserJWTSerializer):
+    """
+    For social login endpoint to decide what to respond to frontend upon login (work with JWT)
+    """
+    class Meta:
+        model = get_user_model()
+        exclude = UserJWTSerializer.Meta.exclude + ('uuid', 'username',)
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):

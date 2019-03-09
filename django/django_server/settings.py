@@ -49,15 +49,18 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # "Add CorsMiddleware as high as possible"
+    # https://github.com/OttoYiu/django-cors-headers#setup
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'django_server.urls'
@@ -158,7 +161,7 @@ REST_FRAMEWORK = {
     # JWT settings
     # http://getblimp.github.io/django-rest-framework-jwt/
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticated', # this will make all endpoints require login by default for all CRUD operations.
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
@@ -167,11 +170,16 @@ REST_FRAMEWORK = {
     ),
 }
 
+
+# Django CORS header settings
+#
+
 CORS_ORIGIN_WHITELIST = (
     'localhost:3000',
 )
-# CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
+# CORS_ORIGIN_ALLOW_ALL = True # this sets the header to '*'
+CORS_ALLOW_CREDENTIALS = True # this includes cookie and JWT auth tokens
+
 
 # Social Auth
 # https://github.com/st4lk/django-rest-social-auth
@@ -181,16 +189,13 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend', # Django's native default
 )
 
+# these redirect settings are useless when using JWT, i.e., code + jwt flow for social auth
 # REST_SOCIAL_OAUTH_REDIRECT_URI = '/'
 # REST_SOCIAL_DOMAIN_FROM_ORIGIN = True
 # REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI = 'http://localhost:3000/auth/google/callback/'
 REST_SOCIAL_LOG_AUTH_EXCEPTIONS = True #  log social auth authentication exceptions for debug purpose, can turn off in production (cuz you're not letting others to learn to use this API, it's only used by the web app)
 
-# LOGIN_URL = 'http://localhost:3000/'
-# LOGIN_REDIRECT_URL = 'http://localhost:3000/'
-# LOGOUT_REDIRECT_URL = 'http://localhost:3000/'
-
-# Social Backends
+# Social backend credentials
 # https://python-social-auth.readthedocs.io/en/latest/configuration/porting_from_dsa.html?highlight=SOCIAL_AUTH_FACEBOOK_KEY
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
