@@ -1,5 +1,5 @@
 # appl-tracky
-An Application Tracking System to help job finders ease their out-of-control spreadsheet use tracking every job application record.
+An Application Tracking System to help job finders ease their out-of-control spreadsheet use tracking every job application record. The main documentation for this app is in the [front end repo](https://github.com/rivernews/appl-tracky-spa).
 
 ## Back End Roadmap
 
