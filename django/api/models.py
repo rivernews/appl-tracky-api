@@ -35,10 +35,37 @@ class ManagedBaseModel(models.Model):
     
     class Meta:
         abstract = True
+        ordering = ['created_at']
 
-# Create your models here.
+class Address(ManagedBaseModel):
+    place_name = models.CharField(blank=True, max_length=50)
+    country = models.CharField(blank=True, max_length=50)
+    state = models.CharField(blank=True, max_length=50)
+    city = models.CharField(blank=True, max_length=50)
+    street = models.CharField(blank=True, max_length=150)
+    full_address = models.CharField(blank=True, max_length=200, help_text="The full address if the form does not apply for your address.")
+    zipcode = models.CharField(blank=True, max_length=20)
+
+    def __str__(self):
+        return self.place_name or self.full_address
+    
+    class Meta:
+        verbose_name_plural = "addresses"
+
+class Link(ManagedBaseModel):
+    text = models.CharField(blank=True, max_length=200)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True) # null to determine if it's pre-populated link or user input link
+    url = models.URLField(null=False, blank=False)
+    order = models.IntegerField(null=True, blank=True, default=0)
+
+    def __str__(self):
+        return self.text
+
+    class Meta:
+        ordering = ['-order', 'text', 'url']
+        
 class Company(ManagedBaseModel):
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated company or user input company
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True) # null to determine if it's pre-populated company or user input company
     labels = models.ManyToManyField('Label', blank=True)
 
     name = models.CharField(blank=False, max_length=100)
@@ -83,33 +110,6 @@ class CompanyRating(ManagedBaseModel):
 
     def __str__(self):
         return self.value
-
-class Address(ManagedBaseModel):
-    place_name = models.CharField(blank=True, max_length=50)
-    country = models.CharField(blank=True, max_length=50)
-    state = models.CharField(blank=True, max_length=50)
-    city = models.CharField(blank=True, max_length=50)
-    street = models.CharField(blank=True, max_length=150)
-    full_address = models.CharField(blank=True, max_length=200, help_text="The full address if the form does not apply for your address.")
-    zipcode = models.CharField(blank=True, max_length=20)
-
-    def __str__(self):
-        return self.place_name or self.full_address
-    
-    class Meta:
-        verbose_name_plural = "addresses"
-
-class Link(ManagedBaseModel):
-    text = models.CharField(blank=False, max_length=200)
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated link or user input link
-    url = models.URLField(null=False, blank=False)
-    order = models.IntegerField(null=True, blank=True, default=0)
-
-    def __str__(self):
-        return self.text
-
-    class Meta:
-        ordering = ['-order', 'text']
 
 class Label(ManagedBaseModel):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated label or user input label
