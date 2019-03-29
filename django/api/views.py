@@ -3,16 +3,10 @@ from django.views.generic import TemplateView
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from .models import (
-    Address,
-)
-
+from . import models
 from rest_framework import viewsets
 from rest_social_auth.views import SocialJWTUserAuthView
-from .serializers import (
-    UserSerializer, SocialAuthUserSerializer, GroupSerializer,
-    AddressSerializer
-)
+from . import serializers
 
 # Create your views here.
 class ApiHomeView(TemplateView):
@@ -28,7 +22,7 @@ class UserViewSet(viewsets.ModelViewSet):
     API endpoint that allows users to be viewed or edited.
     """
     queryset = get_user_model().objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
+    serializer_class = serializers.UserSerializer
 
     def get_queryset(self):
         if not self.request.user.is_authenticated:
@@ -43,19 +37,53 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class SocialAuthView(SocialJWTUserAuthView):
-      serializer_class = SocialAuthUserSerializer
+      serializer_class = serializers.SocialAuthUserSerializer
 
+
+"""
+    REST API
+"""
 
 class GroupViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
     queryset = Group.objects.all()
-    serializer_class = GroupSerializer
+    serializer_class = serializers.GroupSerializer
+
+class CompanyViewSet(viewsets.ModelViewSet):
+    queryset = models.Company.objects.all()
+    serializer_class = serializers.CompanySerializer
+
+class CompanyRatingViewSet(viewsets.ModelViewSet):
+    queryset = models.CompanyRating.objects.all()
+    serializer_class = serializers.CompanyRatingSerializer
 
 class AddressViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Address.objects.all()
-    serializer_class = AddressSerializer
+    queryset = models.Address.objects.all()
+    serializer_class = serializers.AddressSerializer
+
+class LinkViewSet(viewsets.ModelViewSet):
+    queryset = models.Link.objects.all()
+    serializer_class = serializers.LinkSerializer
+
+class LabelViewSet(viewsets.ModelViewSet):
+    queryset = models.Label.objects.all()
+    serializer_class = serializers.LabelSerializer
+
+class ApplicationViewSet(viewsets.ModelViewSet):
+    queryset = models.Application.objects.all()
+    serializer_class = serializers.ApplicationSerializer
+
+class PositionLocationViewSet(viewsets.ModelViewSet):
+    queryset = models.PositionLocation.objects.all()
+    serializer_class = serializers.PositionLocationSerializer
+
+class ApplicationStatusViewSet(viewsets.ModelViewSet):
+    queryset = models.ApplicationStatus.objects.all()
+    serializer_class = serializers.ApplicationStatusSerializer
+
+class ApplicationStatusLinkViewSet(viewsets.ModelViewSet):
+    queryset = models.ApplicationStatusLink.objects.all()
+    serializer_class = serializers.ApplicationStatusLinkSerializer
+

@@ -9,7 +9,16 @@ from rest_framework_jwt.views import obtain_jwt_token
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
+# REST API
+router.register(r'companies', views.CompanyViewSet)
+router.register(r'company-ratings', views.CompanyRatingViewSet)
 router.register(r'addresses', views.AddressViewSet)
+router.register(r'links', views.LinkViewSet)
+router.register(r'labels', views.LabelViewSet)
+router.register(r'applications', views.ApplicationViewSet)
+router.register(r'position-locations', views.PositionLocationViewSet)
+router.register(r'application-statuses', views.ApplicationStatusViewSet)
+router.register(r'application-status-links', views.ApplicationStatusLinkViewSet)
 
 urlpatterns = [
     # Django views

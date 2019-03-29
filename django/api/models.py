@@ -79,7 +79,7 @@ class CompanyRating(ManagedBaseModel):
     source = models.OneToOneField('Link', on_delete=models.SET_NULL, null=True)
     value = models.FloatField(null=False, blank=False, default=0.0)
     company = models.ForeignKey('Company', on_delete=models.CASCADE, null=False)
-    sample_date = models.DateField(null=False, blank=True, default=timezone.now)
+    sample_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.value
@@ -116,6 +116,8 @@ class Label(ManagedBaseModel):
     text = models.CharField(blank=False, max_length=200)
     color = models.CharField(blank=True, max_length=20)
     order = models.IntegerField(null=False, blank=True, default=0)
+
+    # you can use label.company_set or label.application_set to do reverse lookup
 
     def __str__(self):
         return self.text
@@ -170,7 +172,7 @@ class ApplicationStatus(ManagedBaseModel):
 
     class Meta:
         get_latest_by = ['order', 'date', 'created_at']
-        verbose_name_plural = "application statuses"
+        verbose_name_plural = "application_statuses"
 
 class ApplicationStatusLink(ManagedBaseModel):
     application_status = models.ForeignKey('ApplicationStatus', on_delete=models.CASCADE, null=False)
