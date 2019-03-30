@@ -77,8 +77,10 @@ class CompanySerializer(BaseSerializer):
         home_page = models.Link.objects.create(**home_page_data, user=user)
         company = models.Company.objects.create(
             **validated_data, 
+            user=user,
             # one to one relationship
-            hq_location=hq_location, home_page=home_page
+            hq_location=hq_location, 
+            home_page=home_page
         ) 
         return company
 
@@ -93,6 +95,11 @@ class LabelSerializer(BaseSerializer):
         fields = ('url', 'uuid', 'user', 'text', 'color', 'order', 'modified_at')
 
 class ApplicationSerializer(BaseSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True) # foreign jey
+    user_company = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Company.objects.all()) # foreign jey
+    job_description_page = LinkSerializer(many=False) # onetoone
+    job_source = LinkSerializer(many=False) # onetoone
+
     class Meta:
         model = models.Application
         fields = (
@@ -100,6 +107,27 @@ class ApplicationSerializer(BaseSerializer):
             'user_company', 'position_title', 
             'job_description_page', 'job_source', 
             'labels', 'modified_at')
+    
+    def create(self, validated_data):
+        """
+            In order to use nested serializer fields, you have to write this .create() function
+        """
+        # access data
+        user = validated_data.pop('user')
+        job_description_page_data = validated_data.pop('job_description_page')
+        job_source_data = validated_data.pop('job_source')
+
+        # create or get related objects
+        job_description_page = models.Link.objects.create(**job_description_page_data, user=user)
+        job_source = models.Link.objects.create(**job_source_data, user=user)
+        application = models.Application.objects.create(
+            **validated_data,
+            user=user,
+            # one to one relationships
+            job_description_page=job_description_page, 
+            job_source=job_source
+        ) 
+        return application
 
 class PositionLocationSerializer(BaseSerializer):
     class Meta:

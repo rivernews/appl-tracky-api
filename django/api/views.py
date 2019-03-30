@@ -65,16 +65,19 @@ class CompanyViewSet(viewsets.ModelViewSet):
     queryset = models.Company.objects.all()
     serializer_class = ApiSerializers.CompanySerializer
 
-    def create(self, request):
-        """
-            Entry point for POST request.
-            CompanyViewSet.create() => 
-            .is_valid() based on serializer's fields => 
-            CompanyViewSet.perform_create() =>
-            CompanySerializer.create()
-        """
-        serializer = ApiSerializers.CompanySerializer(data=request.data)
-        return super(CompanyViewSet, self).create(request)
+    # def create(self, request):
+    #     """
+    #         Entry point for POST request.
+    #         CompanyViewSet.create() => 
+    #         .is_valid() based on serializer's fields => 
+    #         CompanyViewSet.perform_create() =>
+    #         CompanySerializer.create()
+    #     """
+    #     # you can inspect serializer and .is_valid() here
+    #     serializer = self.serializer_class(data=request.data)
+    #     print("Is valid?", serializer.is_valid())
+    #     import ipdb; ipdb.set_trace()
+    #     return super(CompanyViewSet, self).create(request)
     
     def perform_create(self, serializer):
         """
@@ -96,6 +99,9 @@ class LabelViewSet(viewsets.ModelViewSet):
 class ApplicationViewSet(viewsets.ModelViewSet):
     queryset = models.Application.objects.all()
     serializer_class = ApiSerializers.ApplicationSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class PositionLocationViewSet(viewsets.ModelViewSet):
     queryset = models.PositionLocation.objects.all()

@@ -20,10 +20,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
 
 try:
     from .credentials import *
+    DEBUG = True
 except ImportError:
     DEBUG = False
 
@@ -142,6 +143,7 @@ AUTH_USER_MODEL = 'api.CustomUser'
 
 # REST framework settings
 # https://www.django-rest-framework.org/tutorial/quickstart/#pagination
+
 REST_FRAMEWORK = {
     # Scalability - pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
@@ -170,6 +172,8 @@ REST_FRAMEWORK = {
     ),
 }
 
+# if DEBUG:
+#     REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = ('rest_framework.permissions.AllowAny',)
 
 # Django CORS header settings
 #
