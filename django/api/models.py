@@ -6,6 +6,9 @@ from django.contrib.auth.models import AbstractUser
 
 from django.utils import timezone
 
+from django.dispatch import receiver
+from django.db.models.signals import post_delete
+
 class CustomUser(AbstractUser):
     # add additional fields in here
     uuid = models.UUIDField(primary_key=True, null=False, default=uuid.uuid4, editable=False)
@@ -49,19 +52,19 @@ class Address(ManagedBaseModel):
     def __str__(self):
         return self.place_name or self.full_address
     
-    class Meta:
+    class Meta(ManagedBaseModel.Meta):
         verbose_name_plural = "addresses"
 
 class Link(ManagedBaseModel):
     text = models.CharField(blank=True, max_length=200)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True) # null to determine if it's pre-populated link or user input link
-    url = models.URLField(null=False, blank=False)
+    url = models.URLField(null=True, blank=True)
     order = models.IntegerField(null=True, blank=True, default=0)
 
     def __str__(self):
         return self.text
 
-    class Meta:
+    class Meta(ManagedBaseModel.Meta):
         ordering = ['-order', 'text', 'url']
         
 class Company(ManagedBaseModel):
@@ -98,9 +101,19 @@ class Company(ManagedBaseModel):
     def __str__(self):
         return self.name
     
-    class Meta:
+    class Meta(ManagedBaseModel.Meta):
         verbose_name_plural = "companies"
         unique_together = ("user", "name", "home_page")
+
+@receiver(post_delete, sender=Company)
+def post_delete_company_onetoone_fields(sender, instance, *args, **kwargs):
+    """
+        https://stackoverflow.com/questions/12754024/onetoonefield-and-deleting
+    """
+    if instance.hq_location:
+        instance.hq_location.delete()
+    if instance.home_page:
+        instance.home_page.delete()
 
 class CompanyRating(ManagedBaseModel):
     source = models.OneToOneField('Link', on_delete=models.SET_NULL, null=True)
@@ -110,6 +123,14 @@ class CompanyRating(ManagedBaseModel):
 
     def __str__(self):
         return self.value
+    
+    class Meta(ManagedBaseModel.Meta):
+        pass
+
+@receiver(post_delete, sender=CompanyRating)
+def post_delete_companyrating_onetoone_fields(sender, instance, *args, **kwargs):
+    if instance.source:
+        instance.source.delete()
 
 class Label(ManagedBaseModel):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated label or user input label
@@ -122,7 +143,7 @@ class Label(ManagedBaseModel):
     def __str__(self):
         return self.text
 
-    class Meta:
+    class Meta(ManagedBaseModel.Meta):
         ordering = ['-order', 'text']
 
 class Application(ManagedBaseModel):
@@ -149,6 +170,16 @@ class Application(ManagedBaseModel):
 
     def __str__(self):
         return self.position_title
+    
+    class Meta(ManagedBaseModel.Meta):
+        pass
+
+@receiver(post_delete, sender=Application)
+def post_delete_application_onetoone_fields(sender, instance, *args, **kwargs):
+    if instance.job_description_page:
+        instance.job_description_page.delete()
+    if instance.job_source:
+        instance.job_source.delete()
 
 class PositionLocation(ManagedBaseModel):
     application = models.ForeignKey('Application', on_delete=models.CASCADE, null=False)
@@ -156,6 +187,9 @@ class PositionLocation(ManagedBaseModel):
 
     def __str__(self):
         return str(self.location)
+    
+    class Meta(ManagedBaseModel.Meta):
+        pass
 
 class ApplicationStatus(ManagedBaseModel):
     text = models.CharField(blank=False, max_length=50)
@@ -170,7 +204,7 @@ class ApplicationStatus(ManagedBaseModel):
     def __str__(self):
         return self.text
 
-    class Meta:
+    class Meta(ManagedBaseModel.Meta):
         get_latest_by = ['order', 'date', 'created_at']
         verbose_name_plural = "application_statuses"
 
@@ -180,3 +214,6 @@ class ApplicationStatusLink(ManagedBaseModel):
 
     def __str__(self):
         return str(self.link)
+    
+    class Meta(ManagedBaseModel.Meta):
+        pass

@@ -96,7 +96,11 @@ class LabelSerializer(BaseSerializer):
 
 class ApplicationSerializer(BaseSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True) # foreign jey
-    user_company = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Company.objects.all()) # foreign jey
+
+    # foreign key & frontend use uuid to specify (write to this field) the target company
+    # the `queryset=...` arg is for lookup the company obj by uuid from frontend
+    user_company = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Company.objects.all())
+
     job_description_page = LinkSerializer(many=False) # onetoone
     job_source = LinkSerializer(many=False) # onetoone
 
