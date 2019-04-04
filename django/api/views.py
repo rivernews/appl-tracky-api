@@ -40,6 +40,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         if self.request.user.is_superuser:
             return self.model.objects.all()
         elif not self.request.user.is_authenticated:
+            print("user not login", self.request.user)
             raise PermissionError
         
         # restrict access for owner-only models
