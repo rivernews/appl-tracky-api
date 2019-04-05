@@ -191,6 +191,11 @@ class PositionLocation(ManagedBaseModel):
     class Meta(ManagedBaseModel.Meta):
         pass
 
+@receiver(post_delete, sender=PositionLocation)
+def post_delete_positionlocation_onetoone_fields(sender, instance, *args, **kwargs):
+    if instance.location:
+        instance.location.delete()
+
 class ApplicationStatus(ManagedBaseModel):
     text = models.CharField(blank=False, max_length=50)
     application = models.ForeignKey('Application', on_delete=models.CASCADE, null=True, blank=False) # null means this status is system pre-populated, instead of user input/defined.
@@ -217,3 +222,8 @@ class ApplicationStatusLink(ManagedBaseModel):
     
     class Meta(ManagedBaseModel.Meta):
         pass
+
+@receiver(post_delete, sender=ApplicationStatusLink)
+def post_delete_applicationstatuslink_onetoone_fields(sender, instance, *args, **kwargs):
+    if instance.link:
+        instance.link.delete()

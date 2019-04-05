@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import FieldDoesNotExist
 from django.contrib.auth.models import Group
 from . import models
 from rest_framework import serializers
@@ -6,6 +7,52 @@ from rest_social_auth.serializers import UserJWTSerializer
 
 class BaseSerializer(serializers.HyperlinkedModelSerializer):
     uuid = serializers.ReadOnlyField()
+
+    one_to_one_fields = [{
+        'field_name': None,
+        'model': None,
+    },]
+
+    def create(self, validated_data):
+        """
+            In order to use nested serializer fields, you have to write this .create() function
+        """
+
+        additional_fields = {}
+
+        # handle optional user field for model
+        model_user_field_data = validated_data.get('user', None)
+        try:
+            self.Meta.model._meta.get_field('user')
+            is_model_user_field_exist = True
+        except FieldDoesNotExist:
+            is_model_user_field_exist = False
+
+        # access data
+        for one_to_one_field in self.one_to_one_fields:
+            field_name = one_to_one_field['field_name']
+            model = one_to_one_field['model']
+            
+            try:
+                model._meta.get_field('user')
+                is_user_field_exist = True
+            except FieldDoesNotExist:
+                is_user_field_exist = False
+
+            # create model object
+            data = validated_data.pop(field_name)
+            if model_user_field_data and is_user_field_exist:
+                data = { **data, 'user': model_user_field_data }
+            additional_fields[field_name] = model.objects.create(**data)
+
+        # create main model obj
+        new_model_object = self.Meta.model.objects.create(
+            **validated_data, **additional_fields
+        )
+        return new_model_object
+    
+    class Meta:
+        model = None
 
 class UserSerializer(BaseSerializer):
     """
@@ -60,31 +107,34 @@ class CompanySerializer(BaseSerializer):
     hq_location = AddressSerializer(many=False)
     home_page = LinkSerializer(many=False)
 
+    one_to_one_fields = [
+        {
+            'field_name': 'hq_location',
+            'model': models.Address,
+        },
+        {
+            'field_name': 'home_page',
+            'model': models.Link,
+        },
+    ]
+
     class Meta:
         model = models.Company
         fields = ('url', 'uuid', 'user', 'labels', 'name', 'hq_location', 'home_page', 'modified_at')
     
-    def create(self, validated_data):
-        """
-            This is the place to create database object in order to store it in database.
-            We will only do the object creation part, and return the object.
-            Storing to database will be handled by DRF.
-        """
-        user = validated_data.pop('user')
-        hq_location_data = validated_data.pop('hq_location')
-        home_page_data = validated_data.pop('home_page')
-        hq_location = models.Address.objects.create(**hq_location_data)
-        home_page = models.Link.objects.create(**home_page_data, user=user)
-        company = models.Company.objects.create(
-            **validated_data, 
-            user=user,
-            # one to one relationship
-            hq_location=hq_location, 
-            home_page=home_page
-        ) 
-        return company
-
 class CompanyRatingSerializer(BaseSerializer):
+
+    source = LinkSerializer(many=False)
+    
+    company = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Company.objects.all())
+
+    one_to_one_fields = [
+        {
+            'field_name': 'source',
+            'model': models.Link,
+        },
+    ]
+
     class Meta:
         model = models.CompanyRating
         fields = ('url', 'uuid', 'source', 'value', 'company', 'sample_date', 'modified_at')
@@ -104,6 +154,17 @@ class ApplicationSerializer(BaseSerializer):
     job_description_page = LinkSerializer(many=False) # onetoone
     job_source = LinkSerializer(many=False) # onetoone
 
+    one_to_one_fields = [
+        {
+            'field_name': 'job_description_page',
+            'model': models.Link,
+        },
+        {
+            'field_name': 'job_source',
+            'model': models.Link,
+        },
+    ]
+
     class Meta:
         model = models.Application
         fields = (
@@ -112,38 +173,44 @@ class ApplicationSerializer(BaseSerializer):
             'job_description_page', 'job_source', 
             'labels', 'modified_at')
     
-    def create(self, validated_data):
-        """
-            In order to use nested serializer fields, you have to write this .create() function
-        """
-        # access data
-        user = validated_data.pop('user')
-        job_description_page_data = validated_data.pop('job_description_page')
-        job_source_data = validated_data.pop('job_source')
-
-        # create or get related objects
-        job_description_page = models.Link.objects.create(**job_description_page_data, user=user)
-        job_source = models.Link.objects.create(**job_source_data, user=user)
-        application = models.Application.objects.create(
-            **validated_data,
-            user=user,
-            # one to one relationships
-            job_description_page=job_description_page, 
-            job_source=job_source
-        ) 
-        return application
-
 class PositionLocationSerializer(BaseSerializer):
+
+    location = AddressSerializer(many=False)
+
+    application = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Application.objects.all())
+
+    one_to_one_fields = [
+        {
+            'field_name': 'location',
+            'model': models.Address,
+        },
+    ]
+
     class Meta:
         model = models.PositionLocation
         fields = ('url', 'uuid', 'application', 'location', 'modified_at')
 
 class ApplicationStatusSerializer(BaseSerializer):
+
+    application = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Application.objects.all())
+
     class Meta:
         model = models.ApplicationStatus
         fields = ('url', 'uuid', 'text', 'application', 'date', 'order', 'modified_at')
 
 class ApplicationStatusLinkSerializer(BaseSerializer):
+
+    link = LinkSerializer(many=False)
+
+    application_status = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.ApplicationStatus.objects.all())
+
+    one_to_one_fields = [
+        {
+            'field_name': 'link',
+            'model': models.Link,
+        },
+    ]
+
     class Meta:
         model = models.ApplicationStatusLink
         fields = ('url', 'uuid', 'application_status', 'link', 'modified_at')

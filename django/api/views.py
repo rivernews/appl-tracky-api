@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.core.exceptions import FieldDoesNotExist
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -44,13 +45,26 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             raise PermissionError
         
         # restrict access for owner-only models
+        if self.is_user_field_exist():
+            return self.model.objects.filter(user=self.request.user)
+        else:
+            return self.model.objects.all()
+    
+    def is_user_field_exist(self):
         try:
             self.model._meta.get_field('user')
-            print("restricting user! release obj=", self.model.objects.filter(user=self.request.user))
-            return self.model.objects.filter(user=self.request.user)
-        except:
-            print("no user field on model. Will let it go. Model=", self.model)
-            return self.model.objects.all()
+            return True
+        except FieldDoesNotExist:
+            return False
+    
+    def perform_create(self, serializer):
+        """
+            After serializer's .is_valid() call:
+            The create() method of our serializer will now be passed 
+            an additional 'user' field, along with the validated data from the request.
+        """
+        if self.is_user_field_exist():
+            serializer.save(user=self.request.user)
 
 class UserViewSet(BaseModelViewSet):
     """
@@ -102,14 +116,6 @@ class CompanyViewSet(BaseModelViewSet):
     #     import ipdb; ipdb.set_trace()
     #     return super(CompanyViewSet, self).create(request)
 
-    def perform_create(self, serializer):
-        """
-            After .is_valid() call:
-            The create() method of our serializer will now be passed 
-            an additional 'user' field, along with the validated data from the request.
-        """
-        serializer.save(user=self.request.user)
-    
 
 class CompanyRatingViewSet(BaseModelViewSet):
     model = models.CompanyRating
@@ -125,9 +131,6 @@ class ApplicationViewSet(BaseModelViewSet):
     model = models.Application
     queryset = models.Application.objects.none()
     serializer_class = ApiSerializers.ApplicationSerializer
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
 class PositionLocationViewSet(BaseModelViewSet):
     model = models.PositionLocation
