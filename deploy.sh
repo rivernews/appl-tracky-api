@@ -19,7 +19,7 @@ cd .. && \
 $(aws ecr get-login --no-include-email --region us-east-2) && \
 NEW_IMAGE_TAG=$(git rev-parse --short HEAD) && \
 echo "INFO: Git short hash is ${NEW_IMAGE_TAG}, we will use this as new image tag." && \
-source .env && echo "INFO: Sourced environment file, test: AWS_ECR_NGINX_REPO_URI=${AWS_ECR_NGINX_REPO_URI}" && \
+source .env.sh && source .env && echo "INFO: Run script to generate environment file, test: AWS_ECR_NGINX_REPO_URI=${AWS_ECR_NGINX_REPO_URI}" && \
 (docker container stop $(docker container ls -aq) || echo "INFO: No docker container to stop") && \
 docker-compose --verbose --log-level DEBUG up -d --build --remove-orphans && \
 docker tag "${AWS_ECR_NGINX_REPO_URI}:latest" "${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && echo "INFO: finish tagging ${AWS_ECR_NGINX_REPO_URI}:${NEW_IMAGE_TAG}" && \
