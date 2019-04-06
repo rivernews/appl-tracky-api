@@ -11,8 +11,14 @@ then
     echo "PostgreSQL started"
 fi
 
-python manage.py flush --no-input
+# to claer out the data, see https://stackoverflow.com/questions/7907456/emptying-the-database-through-djangos-manage-py
+# python manage.py flush --no-input
+# python manage.py migrate --fake
+
+# this will only run on a fresh provision and the following.
+# if you do `flush`, then this `migrate` will not work
 python manage.py migrate
+
 python manage.py collectstatic --clear --noinput
 python manage.py collectstatic --no-input
 python manage.py initialize_superuser
