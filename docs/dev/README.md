@@ -97,8 +97,8 @@ application_status ManyToOne FK >- ApplicationStatus.uuid
 
 - Some prerequisites to deploy
     - Have Docker running in background
-    - Better use the `deploy.sh` in the root folder
+    - Better use the `deploy.sh` in the root folder to do CD. And yes, you should only need to run this file and don't have to touch anything else. But if any of the server has issue, you will have to log into AWS console or run docker locally to debug.
 - Some debug tips for Docker
     - Sometimes restart docker will do the trick
     - use `docker system prune --volumes` to clean up all.
-    - If docker goes wrong, it's very likely that some issues are in `.env`, `.env.sh` or `deploy.sh`. Pay attention to string variable interpolation.
+    - If docker goes wrong, it's very likely that some issues are in `.env`, `.env.sh` or `deploy.sh`. Pay attention to string variable interpolation. You may found some post talking about `.dockerignore` and large files, but that's not our case.

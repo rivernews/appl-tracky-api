@@ -22,18 +22,19 @@ router.register(r'application-status-links', views.ApplicationStatusLinkViewSet)
 
 urlpatterns = [
     # Django views
-    url(r'^home/$', views.ApiHomeView.as_view(), name='api-homepage'),
+    url(r'^$', views.ApiHomeView.as_view(), name='homepage'),
+    url(r'^home/$', views.ApiHomeView.as_view(), name='homepage-home'),
 
     # API endpoints
-    url(r'^', include(router.urls)),
+    url(r'^api/', include(router.urls)),
     
     # social auth endpoints
     # https://github.com/st4lk/django-rest-social-auth/blob/master/rest_social_auth/urls_jwt.py
-    url(r'^login/social/$', views.SocialAuthView.as_view(), name='login_social_jwt_user'),
+    url(r'^api/login/social/$', views.SocialAuthView.as_view(), name='login_social_jwt_user'),
 
     # login URLs for the browsable API.
     url(r'^login/', include('rest_framework.urls', namespace='rest_framework')),
     
     # JWT token endpoint
-    url(r'^api-token-auth/', obtain_jwt_token),
+    url(r'^api/api-token-auth/', obtain_jwt_token),
 ]
