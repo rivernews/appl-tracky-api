@@ -1,6 +1,14 @@
 **/venv
-**/.git
-**/terraform
-**/docs
-**/*.sqlite3
+django/venv/*
 
+**/.git
+.git/*
+
+**/terraform
+terraform/*
+
+**/docs
+docs/*
+
+**/*.sqlite3
+django/db.sqlite3
