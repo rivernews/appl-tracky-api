@@ -94,3 +94,8 @@ application_status ManyToOne FK >- ApplicationStatus.uuid
 ## Production server testing
 
 - Our react is getting closer and closer to the basic functionality goal. At this point, we will launch a initial testing on production server to see if there's any potential issues. Especially the database part. Also CORS, and other security issues in mind.
+
+- Some prerequisites to deploy
+    - Have Docker running in background
+    - Better use the `deploy.sh` in the root folder
+    
