@@ -46,7 +46,7 @@ class Address(ManagedBaseModel):
     state = models.CharField(blank=True, max_length=50)
     city = models.CharField(blank=True, max_length=50)
     street = models.CharField(blank=True, max_length=150)
-    full_address = models.CharField(blank=True, max_length=200, help_text="The full address if the form does not apply for your address.")
+    full_address = models.CharField(blank=True, max_length=200, help_text="The full address of the form does not apply for your address.")
     zipcode = models.CharField(blank=True, max_length=20)
 
     def __str__(self):
@@ -198,8 +198,8 @@ def post_delete_positionlocation_onetoone_fields(sender, instance, *args, **kwar
 
 class ApplicationStatus(ManagedBaseModel):
     text = models.CharField(blank=False, max_length=50)
-    application = models.ForeignKey('Application', on_delete=models.CASCADE, null=True, blank=False) # null means this status is system pre-populated, instead of user input/defined.
-    date = models.DateField(null=True, blank=True, default=timezone.now, help_text="The date this status is updated. You can modify this field to reflect the correct date, especially when you create this status at a later point.")
+    application = models.ForeignKey('Application', on_delete=models.CASCADE, null=True, blank=True) # null means this status is system pre-populated, instead of user input/defined.
+    date = models.DateField(null=True, blank=True, default=timezone.localdate, help_text="The date this status is updated. You can modify this field to reflect the correct date, especially when you create this status at a later point.")
     order = models.IntegerField(null=False, blank=True, default=0)
     
     @property
@@ -214,6 +214,7 @@ class ApplicationStatus(ManagedBaseModel):
         verbose_name_plural = "application_statuses"
 
 class ApplicationStatusLink(ManagedBaseModel):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
     application_status = models.ForeignKey('ApplicationStatus', on_delete=models.CASCADE, null=False)
     link = models.OneToOneField(Link, on_delete=models.CASCADE, null=False, blank=False)
 

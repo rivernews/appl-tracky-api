@@ -8,18 +8,20 @@ from rest_social_auth.serializers import UserJWTSerializer
 class BaseSerializer(serializers.HyperlinkedModelSerializer):
     uuid = serializers.ReadOnlyField()
 
+    """
     one_to_one_fields = [{
         'field_name': None,
         'model': None,
-    },]
+    }, ...]
+    """
+    one_to_one_fields = []
 
     def create(self, validated_data):
         """
             In order to use nested serializer fields, you have to write this .create() function
         """
-
         additional_fields = {}
-
+        
         # handle optional user field for model
         model_user_field_data = validated_data.get('user', None)
         try:
@@ -32,7 +34,6 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         for one_to_one_field in self.one_to_one_fields:
             field_name = one_to_one_field['field_name']
             model = one_to_one_field['model']
-            
             try:
                 model._meta.get_field('user')
                 is_user_field_exist = True

@@ -62,9 +62,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             After serializer's .is_valid() call:
             The create() method of our serializer will now be passed 
             an additional 'user' field, along with the validated data from the request.
+            
+            refer to: https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/
         """
         if self.is_user_field_exist():
             serializer.save(user=self.request.user)
+        else:
+            serializer.save()
 
 class UserViewSet(BaseModelViewSet):
     """
