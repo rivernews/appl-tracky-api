@@ -203,8 +203,8 @@ class ApplicationStatus(ManagedBaseModel):
     order = models.IntegerField(null=False, blank=True, default=0)
     
     @property
-    def links(self):
-        self.applicationstatuslink_set.all()
+    def application_status_links(self):
+        return [link.uuid for link in self.applicationstatuslink_set.all()]
     
     def __str__(self):
         return self.text

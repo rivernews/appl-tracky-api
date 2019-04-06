@@ -197,7 +197,12 @@ class ApplicationStatusSerializer(BaseSerializer):
 
     class Meta:
         model = models.ApplicationStatus
-        fields = ('url', 'uuid', 'text', 'application', 'date', 'order', 'modified_at')
+        fields = (
+            'url', 'uuid', 'text', 'application', 'date', 'order', 'modified_at', 
+            
+            # computed properties
+            'application_status_links'
+        )
 
 class ApplicationStatusLinkSerializer(BaseSerializer):
 
