@@ -108,3 +108,7 @@ application_status ManyToOne FK >- ApplicationStatus.uuid
 - Resolve issues for CORS, and django's allowed hosts.
 - Setup a conditional params in react for detecting prod or dev env.
 - Resolve [basename](https://github.com/ReactTraining/react-router/issues/4801) in frontend react router.
+
+### Database
+
+- Database is destroyed and not persistent when doing a new deployment.
