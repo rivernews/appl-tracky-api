@@ -31,7 +31,7 @@ docker push "${AWS_ECR_WEB_REPO_URI}:${NEW_IMAGE_TAG}" && \
 echo "SUCCESS! ECR image ready." && \
 echo "Now running orchestration tool to update service..." && \
 cd terraform && \
-terraform apply -var="ecr_new_image_tag=${NEW_IMAGE_TAG:-latest}" && \
+terraform apply -var="ecr_new_image_tag=${NEW_IMAGE_TAG:-latest}" -auto-approve && \
 cd .. && \
 echo "SUCCESS! Allow several minutes for change to take effect on production server. Take some rest and have a cup of coffee! Then go to the url and check it out." && return
 

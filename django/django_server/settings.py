@@ -164,6 +164,9 @@ AUTH_USER_MODEL = 'api.CustomUser'
 # REST framework settings
 # https://www.django-rest-framework.org/tutorial/quickstart/#pagination
 
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 REST_FRAMEWORK = {
     # Scalability - pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
