@@ -1,14 +1,22 @@
 **/venv
+**/venv/*
 django/venv/*
 
 **/.git
 .git/*
+**/.git/*
 
 **/terraform
 terraform/*
 
 **/docs
 docs/*
+**/docs/*
 
 **/*.sqlite3
 django/db.sqlite3
+
+**/__pycache__
+**/__pycache__/*
+django/api/__pycache__/*
+

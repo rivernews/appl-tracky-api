@@ -15,4 +15,3 @@ social-auth-core >=3.0, <4.0
 social-auth-app-django >=3.1, <4.0
 
 # Dev
-autopep8
