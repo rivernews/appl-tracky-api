@@ -15,7 +15,7 @@ python manage.py flush --no-input
 python manage.py migrate
 python manage.py collectstatic --clear --noinput
 python manage.py collectstatic --no-input
-
+python manage.py initialize_superuser
 # exec "$@"
 echo Starting gunicorn...
 gunicorn django_server.wsgi:application --bind 0.0.0.0:8000
