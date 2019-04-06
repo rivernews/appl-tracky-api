@@ -3,6 +3,23 @@ An Application Tracking System to help job finders ease their out-of-control spr
 
 ## Back End Roadmap
 
+### Trouble shooting docker again
+
+```json
+{
+	"auths": {
+		"368061806057.dkr.ecr.us-east-2.amazonaws.com": {},
+		"https://368061806057.dkr.ecr.us-east-1.amazonaws.com": {},
+		"https://368061806057.dkr.ecr.us-east-2.amazonaws.com": {}
+	},
+	"HttpHeaders": {
+		"User-Agent": "Docker-Client/18.09.2 (darwin)"
+	},
+	"credsStore": "osxkeychain",
+	"stackOrchestrator": "swarm"
+}
+```
+
 ### Building Data Model & Database Design
 
 - [x] Create the `Company` table, and create required related tables.
