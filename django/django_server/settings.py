@@ -30,8 +30,6 @@ except ImportError:
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
-ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -48,6 +46,28 @@ INSTALLED_APPS = [
 
     'api.apps.ApiConfig',
 ]
+
+# Django CORS header settings
+#
+
+ALLOWED_HOSTS = ['*']
+
+# when 
+CORS_ORIGIN_WHITELIST = (
+    'localhost:3000',
+    'appl-tracky-api-https.shaungc.com',
+    'rivernews.github.io'
+)
+
+# this sets the header to '*'. if frontend are sending credentials, you cannot use this.
+# and needs to use CORS_ORIGIN_WHITELIST instead
+# CORS_ORIGIN_ALLOW_ALL = True 
+
+# this is necessary if frontend is sending auth credentials, otherwise browser will raise error:
+# "The value of the 'Access-Control-Allow-Credentials' header in the response is '' 
+# which must be 'true' when the request's credentials mode is 'include'."
+CORS_ALLOW_CREDENTIALS = True # this includes cookie and JWT auth tokens
+
 
 MIDDLEWARE = [
     # "Add CorsMiddleware as high as possible"
@@ -174,15 +194,6 @@ REST_FRAMEWORK = {
 
 # if DEBUG:
 #     REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = ('rest_framework.permissions.AllowAny',)
-
-# Django CORS header settings
-#
-
-CORS_ORIGIN_WHITELIST = (
-    'localhost:3000',
-)
-# CORS_ORIGIN_ALLOW_ALL = True # this sets the header to '*'
-CORS_ALLOW_CREDENTIALS = True # this includes cookie and JWT auth tokens
 
 
 # Social Auth

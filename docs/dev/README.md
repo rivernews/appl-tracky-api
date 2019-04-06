@@ -101,4 +101,10 @@ application_status ManyToOne FK >- ApplicationStatus.uuid
 - Some debug tips for Docker
     - Sometimes restart docker will do the trick
     - use `docker system prune --volumes` to clean up all.
-    - If docker goes wrong, it's very likely that some issues are in `.env`, `.env.sh` or `deploy.sh`. Pay attention to string variable interpolation. You may found some post talking about `.dockerignore` and large files, but that's not our case.
+    - If docker goes wrong, it's very likely that some issues are in `.env`, `.env.sh` or `deploy.sh`. Pay attention to string variable interpolation. You may found some post talking about `.dockerignore` and large files, but that's not our case. [See your own post on Github](https://github.com/docker/compose/issues/4396).
+
+### Resolving request issues between frontend and backend
+
+- Resolve issues for CORS, and django's allowed hosts.
+- Setup a conditional params in react for detecting prod or dev env.
+- Resolve [basename](https://github.com/ReactTraining/react-router/issues/4801) in frontend react router.

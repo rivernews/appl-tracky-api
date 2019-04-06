@@ -25,9 +25,6 @@ urlpatterns = [
     url(r'^$', views.ApiHomeView.as_view(), name='homepage'),
     url(r'^home/$', views.ApiHomeView.as_view(), name='homepage-home'),
 
-    # API endpoints
-    url(r'^api/', include(router.urls)),
-    
     # social auth endpoints
     # https://github.com/st4lk/django-rest-social-auth/blob/master/rest_social_auth/urls_jwt.py
     url(r'^api/login/social/$', views.SocialAuthView.as_view(), name='login_social_jwt_user'),
@@ -37,4 +34,7 @@ urlpatterns = [
     
     # JWT token endpoint
     url(r'^api/api-token-auth/', obtain_jwt_token),
+
+    # API endpoints
+    url(r'^api/', include(router.urls)),
 ]
