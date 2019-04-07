@@ -196,6 +196,22 @@ def post_delete_positionlocation_onetoone_fields(sender, instance, *args, **kwar
     if instance.location:
         instance.location.delete()
 
+class ApplicationStatusLink(ManagedBaseModel):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
+    application_status = models.ForeignKey('ApplicationStatus', on_delete=models.CASCADE, null=True) # we will set this at a later point when ApplicationStatus obj is created
+    link = models.OneToOneField(Link, on_delete=models.CASCADE, null=False, blank=False)
+
+    def __str__(self):
+        return str(self.link)
+    
+    class Meta(ManagedBaseModel.Meta):
+        pass
+
+@receiver(post_delete, sender=ApplicationStatusLink)
+def post_delete_applicationstatuslink_onetoone_fields(sender, instance, *args, **kwargs):
+    if instance.link:
+        instance.link.delete()
+
 class ApplicationStatus(ManagedBaseModel):
     text = models.CharField(blank=False, max_length=50)
     application = models.ForeignKey('Application', on_delete=models.CASCADE, null=True, blank=True) # null means this status is system pre-populated, instead of user input/defined.
@@ -213,18 +229,3 @@ class ApplicationStatus(ManagedBaseModel):
         get_latest_by = ['order', 'date', 'created_at']
         verbose_name_plural = "application_statuses"
 
-class ApplicationStatusLink(ManagedBaseModel):
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
-    application_status = models.ForeignKey('ApplicationStatus', on_delete=models.CASCADE, null=False)
-    link = models.OneToOneField(Link, on_delete=models.CASCADE, null=False, blank=False)
-
-    def __str__(self):
-        return str(self.link)
-    
-    class Meta(ManagedBaseModel.Meta):
-        pass
-
-@receiver(post_delete, sender=ApplicationStatusLink)
-def post_delete_applicationstatuslink_onetoone_fields(sender, instance, *args, **kwargs):
-    if instance.link:
-        instance.link.delete()

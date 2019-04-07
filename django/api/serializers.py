@@ -191,24 +191,11 @@ class PositionLocationSerializer(BaseSerializer):
         model = models.PositionLocation
         fields = ('url', 'uuid', 'application', 'location', 'modified_at')
 
-class ApplicationStatusSerializer(BaseSerializer):
-
-    application = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Application.objects.all())
-
-    class Meta:
-        model = models.ApplicationStatus
-        fields = (
-            'url', 'uuid', 'text', 'application', 'date', 'order', 'modified_at', 
-            
-            # computed properties
-            'application_status_links'
-        )
 
 class ApplicationStatusLinkSerializer(BaseSerializer):
 
     link = LinkSerializer(many=False)
-
-    application_status = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.ApplicationStatus.objects.all())
+    application_status = serializers.PrimaryKeyRelatedField(read_only=True)
 
     one_to_one_fields = [
         {
@@ -221,3 +208,43 @@ class ApplicationStatusLinkSerializer(BaseSerializer):
         model = models.ApplicationStatusLink
         fields = ('url', 'uuid', 'application_status', 'link', 'modified_at')
 
+
+class ApplicationStatusSerializer(BaseSerializer):
+
+    application = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Application.objects.all())
+    applicationstatuslink_set = ApplicationStatusLinkSerializer(many=True, read_only=False)
+
+    class Meta:
+        model = models.ApplicationStatus
+        fields = (
+            'url', 'uuid', 'text', 'application', 'date', 'order', 'modified_at', 
+            
+            # computed properties
+            # 'application_status_links'
+            'applicationstatuslink_set'
+        )
+
+    def create(self, validated_data):
+        
+        new_application_status = models.ApplicationStatus.objects.create(
+            text=validated_data.pop('text'), 
+            application=validated_data.pop('application'), 
+            date=validated_data.pop('date')
+        )
+
+        application_status_links_data_list = validated_data.pop('applicationstatuslink_set')
+        for application_status_link_data in application_status_links_data_list:
+            # create link obj
+            new_link = models.Link.objects.create(**{
+                **application_status_link_data['link'],
+                'user': new_application_status.application.user,
+            })
+
+            # create application status link obj
+            new_application_status_link = models.ApplicationStatusLink.objects.create(**{
+                'link': new_link,
+                'application_status': new_application_status,
+                'user': new_application_status.application.user,
+            })
+
+        return new_application_status
