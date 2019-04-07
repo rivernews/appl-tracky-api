@@ -24,7 +24,7 @@ def update_user_avatar(*args, **kwargs):
         Assign avatar to user object
     """
     user_in_db.avatar_url = avatar_url
-    
+
     
 """
     Example input kwargs:
