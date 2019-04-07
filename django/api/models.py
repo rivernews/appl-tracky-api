@@ -12,6 +12,7 @@ from django.db.models.signals import post_delete
 class CustomUser(AbstractUser):
     # add additional fields in here
     uuid = models.UUIDField(primary_key=True, null=False, default=uuid.uuid4, editable=False)
+    avatar_url = models.URLField(null=True, blank=True)
 
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name'] # will prompt these when do createsuperuser
 

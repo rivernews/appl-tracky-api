@@ -208,10 +208,30 @@ AUTHENTICATION_BACKENDS = (
 # REST_SOCIAL_OAUTH_REDIRECT_URI = '/'
 # REST_SOCIAL_DOMAIN_FROM_ORIGIN = True
 # REST_SOCIAL_OAUTH_ABSOLUTE_REDIRECT_URI = 'http://localhost:3000/auth/google/callback/'
-REST_SOCIAL_LOG_AUTH_EXCEPTIONS = True #  log social auth authentication exceptions for debug purpose, can turn off in production (cuz you're not letting others to learn to use this API, it's only used by the web app)
+REST_SOCIAL_LOG_AUTH_EXCEPTIONS = DEBUG #  log social auth authentication exceptions for debug purpose, can turn off in production (cuz you're not letting others to learn to use this API, it's only used by the web app)
 
 # Social backend credentials
+# available settings: https://python-social-auth.readthedocs.io/en/latest/backends/google.html?highlight=scope
+# all scopes line-up: https://developers.google.com/identity/protocols/googlescopes#peoplev1
 # https://python-social-auth.readthedocs.io/en/latest/configuration/porting_from_dsa.html?highlight=SOCIAL_AUTH_FACEBOOK_KEY
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.environ.get('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.environ.get("SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+]
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.auth_allowed',
+    'social_core.pipeline.social_auth.associate_by_email',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+    'api.pipelines.update_user_avatar',
+)
