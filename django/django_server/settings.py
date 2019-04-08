@@ -233,5 +233,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
+
+    # will run the function update_user_avatar() in app `api`'s pipelines.py
     'api.pipelines.update_user_avatar',
 )
