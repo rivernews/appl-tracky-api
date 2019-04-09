@@ -14,6 +14,10 @@ On the high level, the backend repository consists of several parts:
 - Terraform script for provisioning AWS resources, in order to deploy docker image on AWS Elastic Container Service.
 - Bash scripts to streamline deployment process by just one command.
 
+## Database Schema Design
+
+![data model UML](docs/img/data-model-UML-03-03-v3.png)
+
 ## Challenges
 
 ### Handle Read/Write to Relationships
@@ -40,7 +44,6 @@ The process of figuring out how to deploy docker images on AWS Elastic Container
 
 I wrote a Medium post particularly to describe how some of the components work on AWS: [Protect your AWS ECS Service behind Application Load Balancer (ALB) and create them by Terraform](https://medium.com/@shaungc/protect-your-aws-ecs-service-behind-application-load-balancer-alb-and-create-them-by-terraform-6db816d329f7?source=friends_link&sk=a211b6bee8c4923ff7fde3e8f1f1397d).
 
+A diagram I created that shows my takeaway from setting up servers on the AWS ECS:
 
-## Database Schema Design
-
-![data model UML](docs/img/data-model-UML-03-03-v3.png)
+![AWS diagram](docs/img/aws-diagram.png)
