@@ -14,8 +14,9 @@ class OwnerOnlyObjectPermission(permissions.BasePermission):
         
         # check if user is owner
         print("="*10)
-        if obj.user:
-            print("obj permimsion check! request.user/obj=", request.user, obj)
+        try:
+            print("obj permimsion check! request.user vs obj.user=", request.user, obj.user)
             return request.user == obj.user
-        else:
-            return super(self.__class__, self).has_object_permission(request, view, obj)
+        except AttributeError:
+            # no user attribute on model object
+            return super().has_object_permission(request, view, obj)
