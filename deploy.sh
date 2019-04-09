@@ -37,4 +37,4 @@ echo "SUCCESS! Allow several minutes for change to take effect on production ser
 
 echo Info: error occurred, reverting to original path...
 cd "${ABSPATH}"
-echo ERROR: see above message.
+echo "ERROR: see above message. Reminder: make sure to check if Docker app is turned on."
