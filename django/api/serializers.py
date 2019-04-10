@@ -1,9 +1,11 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, FieldError
 from django.contrib.auth.models import Group
 from . import models
 from rest_framework import serializers
 from rest_social_auth.serializers import UserJWTSerializer
+
+from . import utils as ApiUtils
 
 class BaseSerializer(serializers.HyperlinkedModelSerializer):
     uuid = serializers.ReadOnlyField()
@@ -14,43 +16,75 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         'model': None,
     }, ...]
     """
-    one_to_one_fields = []
+    one_to_one_fields = {}
+    model_user_field_data = None
 
     def create(self, validated_data):
         """
             In order to use nested serializer fields, you have to write this .create() function
         """
-        additional_fields = {}
-        
         # handle optional user field for model
-        model_user_field_data = validated_data.get('user', None)
-        try:
-            self.Meta.model._meta.get_field('user')
-            is_model_user_field_exist = True
-        except FieldDoesNotExist:
-            is_model_user_field_exist = False
+        self.model_user_field_data = validated_data.get('user', None)
 
-        # access data
-        for one_to_one_field in self.one_to_one_fields:
-            field_name = one_to_one_field['field_name']
-            model = one_to_one_field['model']
-            try:
-                model._meta.get_field('user')
-                is_user_field_exist = True
-            except FieldDoesNotExist:
-                is_user_field_exist = False
-
-            # create model object
-            data = validated_data.pop(field_name)
-            if model_user_field_data and is_user_field_exist:
-                data = { **data, 'user': model_user_field_data }
-            additional_fields[field_name] = model.objects.create(**data)
+        # create relational objects
+        relational_fields = self.create_one_to_one_fields(validated_data)
 
         # create main model obj
         new_model_object = self.Meta.model.objects.create(
-            **validated_data, **additional_fields
+            **validated_data, **relational_fields
         )
         return new_model_object
+    
+    def update(self, instance, validated_data):
+        """
+            Update function is a best effort base service.
+            It will try to update the field available.
+            If there's a mismatch between data provided and data model schema,
+            it will ignore them.
+
+            Particularly, it will handle one-to-one fields
+        """
+        self.update_one_to_one_fields(instance, validated_data)
+        ApiUtils.update_instance(instance, validated_data, self.one_to_one_fields)
+
+        return instance
+    
+    def update_one_to_one_fields(self, instance, validated_data):
+
+        for field_name, model in self.one_to_one_fields.items():
+            if field_name in validated_data and ApiUtils.is_instance_field_exist(instance, field_name):
+                # data is provided (and specified by serializer's one_to_one_fields)
+                one_to_one_data = validated_data.pop(field_name)
+
+                # update the one to one field object on instance
+                one_to_one_field_instance = getattr(instance, field_name)
+                # in case one to one field is null
+                if one_to_one_field_instance:
+                    # after we update, we don't need to update subject instance since it references to that one to one model
+                    ApiUtils.update_instance(one_to_one_field_instance, one_to_one_data)
+
+    
+    def create_one_to_one_fields(self, validated_data):
+        one_to_one_fields = {}
+        for field_name, model in self.one_to_one_fields.items():
+
+            """
+                creating one to one fields
+            """
+
+            one_to_one_data = validated_data.pop(field_name)
+
+            # include user info if necessary
+            is_user_field_exist = ApiUtils.is_model_field_exist(model, 'user')
+            if self.model_user_field_data and is_user_field_exist:
+                one_to_one_data = { **one_to_one_data, 'user': self.model_user_field_data }
+            elif (not self.model_user_field_data) and is_user_field_exist:
+                raise FieldError('One to one field object requires a user field, but no user info provided. Please make sure you login.')
+
+            # create model object
+            one_to_one_fields[field_name] = model.objects.create(**one_to_one_data)
+            
+        return one_to_one_fields
     
     class Meta:
         model = None
@@ -108,16 +142,10 @@ class CompanySerializer(BaseSerializer):
     hq_location = AddressSerializer(many=False)
     home_page = LinkSerializer(many=False)
 
-    one_to_one_fields = [
-        {
-            'field_name': 'hq_location',
-            'model': models.Address,
-        },
-        {
-            'field_name': 'home_page',
-            'model': models.Link,
-        },
-    ]
+    one_to_one_fields = {
+        'hq_location': models.Address,
+        'home_page': models.Link,
+    }
 
     class Meta:
         model = models.Company
@@ -129,12 +157,9 @@ class CompanyRatingSerializer(BaseSerializer):
     
     company = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Company.objects.all())
 
-    one_to_one_fields = [
-        {
-            'field_name': 'source',
-            'model': models.Link,
-        },
-    ]
+    one_to_one_fields = {
+        'source': models.Link,
+    }
 
     class Meta:
         model = models.CompanyRating
@@ -155,16 +180,10 @@ class ApplicationSerializer(BaseSerializer):
     job_description_page = LinkSerializer(many=False) # onetoone
     job_source = LinkSerializer(many=False) # onetoone
 
-    one_to_one_fields = [
-        {
-            'field_name': 'job_description_page',
-            'model': models.Link,
-        },
-        {
-            'field_name': 'job_source',
-            'model': models.Link,
-        },
-    ]
+    one_to_one_fields = {
+        'job_description_page': models.Link,
+        'job_source': models.Link,
+    }
 
     class Meta:
         model = models.Application
@@ -180,12 +199,9 @@ class PositionLocationSerializer(BaseSerializer):
 
     application = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Application.objects.all())
 
-    one_to_one_fields = [
-        {
-            'field_name': 'location',
-            'model': models.Address,
-        },
-    ]
+    one_to_one_fields = {
+        'location': models.Address,
+    }
 
     class Meta:
         model = models.PositionLocation
@@ -197,12 +213,9 @@ class ApplicationStatusLinkSerializer(BaseSerializer):
     link = LinkSerializer(many=False)
     application_status = serializers.PrimaryKeyRelatedField(read_only=True)
 
-    one_to_one_fields = [
-        {
-            'field_name': 'link',
-            'model': models.Link,
-        },
-    ]
+    one_to_one_fields = {
+        "link": models.Link
+    }
 
     class Meta:
         model = models.ApplicationStatusLink

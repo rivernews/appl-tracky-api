@@ -13,6 +13,8 @@ from rest_framework import serializers
 
 from . import permissions as ApiPermissions
 
+from . import utils as ApiUtils
+
 # Create your views here.
 class ApiHomeView(TemplateView):
     template_name = 'api/api-index.html'
@@ -45,17 +47,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             raise PermissionError
         
         # restrict access for owner-only models
-        if self.is_user_field_exist():
+        if ApiUtils.is_model_field_exist(self.model, 'user'):
             return self.model.objects.filter(user=self.request.user)
         else:
             return self.model.objects.all()
-    
-    def is_user_field_exist(self):
-        try:
-            self.model._meta.get_field('user')
-            return True
-        except FieldDoesNotExist:
-            return False
     
     def perform_create(self, serializer):
         """
@@ -65,7 +60,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             
             refer to: https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/
         """
-        if self.is_user_field_exist():
+        if ApiUtils.is_model_field_exist(self.model, 'user'):
             serializer.save(user=self.request.user)
         else:
             serializer.save()
