@@ -47,3 +47,9 @@ I wrote a Medium post particularly to describe how some of the components work o
 A diagram I created that shows my takeaway from setting up servers on the AWS ECS:
 
 ![AWS diagram](docs/img/aws-diagram.png)
+
+### Other Aspects
+
+- Permission control
+
+We implement both list-level and object-level permission control for all objects. Basically, only the owner can view its own data. The user information is set in Django, and will not use any data sent from frontend since user inputs are insecure.
