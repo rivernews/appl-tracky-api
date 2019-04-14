@@ -11,7 +11,7 @@ from django.db.models.signals import post_delete
 
 class CustomUser(AbstractUser):
     # add additional fields in here
-    uuid = models.UUIDField(primary_key=True, null=False, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(primary_key=True, blank=True, default=uuid.uuid4)
     avatar_url = models.URLField(null=True, blank=True)
 
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name'] # will prompt these when do createsuperuser
@@ -200,7 +200,7 @@ def post_delete_positionlocation_onetoone_fields(sender, instance, *args, **kwar
 class ApplicationStatusLink(ManagedBaseModel):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True)
     application_status = models.ForeignKey('ApplicationStatus', on_delete=models.CASCADE, null=True) # we will set this at a later point when ApplicationStatus obj is created
-    link = models.OneToOneField(Link, on_delete=models.CASCADE, null=False, blank=False)
+    link = models.OneToOneField(Link, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return str(self.link)
@@ -218,10 +218,6 @@ class ApplicationStatus(ManagedBaseModel):
     application = models.ForeignKey('Application', on_delete=models.CASCADE, null=True, blank=True) # null means this status is system pre-populated, instead of user input/defined.
     date = models.DateField(null=True, blank=True, default=timezone.localdate, help_text="The date this status is updated. You can modify this field to reflect the correct date, especially when you create this status at a later point.")
     order = models.IntegerField(null=False, blank=True, default=0)
-    
-    @property
-    def application_status_links(self):
-        return [link.uuid for link in self.applicationstatuslink_set.all()]
     
     def __str__(self):
         return self.text

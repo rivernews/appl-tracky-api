@@ -141,8 +141,58 @@ class ApplicationStatusViewSet(BaseModelViewSet):
     queryset = models.ApplicationStatus.objects.none()
     serializer_class = ApiSerializers.ApplicationStatusSerializer
 
+    def perform_update(self, serializer):
+        """
+            At this point when `perform_update()` is called, the subject model's `serializer` already called .is_valid().
+            The main goal for `perform_update` is to do serializer.save() to confirm the transaction to database,
+            no need to return anything.
+        """
+
+        # handles trivial fields and one-to-one fields
+        super().perform_create(serializer)
+
+        """
+            Below code handles one-to-many fields manually, while using DRF's serializer as much as we can.
+            The main goal here is to create related field's serializer, call .is_valid(), and call save()
+        """
+        # since DRF doesn't handle one-to-many update for us, we need to start from scratch - from request.data, before we call the serializer class.
+        data_list = self.request.data.get('applicationstatuslink_set', [])
+
+        # we map the instance data provided from frontend form, to instances in the database
+        # particularly, if it's not in database, we interpret this as a create request and create their instances
+        appstatuslink_instances_list = []
+        for data in data_list:
+            uuid = data.get('uuid', None)
+            if uuid == '':
+                uuid = None
+
+            is_created = None
+            if self.request.user.is_superuser:
+                update_instance, is_created = models.ApplicationStatusLink.objects.get_or_create(uuid=uuid)
+            else:
+                update_instance, is_created  = models.ApplicationStatusLink.objects.get_or_create(uuid=uuid, user=self.request.user)
+            
+            if is_created:
+                data['uuid'] = str(update_instance.uuid)
+            
+            appstatuslink_instances_list.append(update_instance)
+        
+        list_serializer = ApiSerializers.ApplicationStatusLinkSerializer(
+            appstatuslink_instances_list, 
+            data=data_list, 
+            many=True, 
+            context={
+                'request': self.request,
+                'parent_instance': serializer.instance,
+            },
+        )
+
+        if list_serializer.is_valid():
+            list_serializer.save()
+        else:
+            raise serializers.ValidationError(str(list_serializer.errors)) 
+
 class ApplicationStatusLinkViewSet(BaseModelViewSet):
     model = models.ApplicationStatusLink
     queryset = models.ApplicationStatusLink.objects.none()
     serializer_class = ApiSerializers.ApplicationStatusLinkSerializer
-
