@@ -149,7 +149,7 @@ def post_delete_companyrating_onetoone_fields(sender, instance, *args, **kwargs)
 
 class Application(ManagedBaseModel):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=False)
-    user_company = models.ForeignKey('Company', on_delete=models.CASCADE, null=True)
+    user_company = models.ForeignKey('Company', on_delete=models.CASCADE, null=True, blank=True)
 
     @property
     def latest_status(self):
@@ -216,7 +216,7 @@ def post_delete_applicationstatuslink_onetoone_fields(sender, instance, *args, *
 class ApplicationStatus(ManagedBaseModel):
     text = models.CharField(blank=False, max_length=50)
     application = models.ForeignKey('Application', on_delete=models.CASCADE, null=True, blank=True) # null means this status is system pre-populated, instead of user input/defined.
-    date = models.DateField(null=True, blank=True, default=timezone.localdate, help_text="The date this status is updated. You can modify this field to reflect the correct date, especially when you create this status at a later point.")
+    date = models.DateField(null=False, blank=True, default=timezone.localdate, help_text="The date this status is updated. You can modify this field to reflect the correct date, especially when you create this status at a later point.")
     order = models.IntegerField(null=False, blank=True, default=0)
     
     def __str__(self):

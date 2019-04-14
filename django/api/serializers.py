@@ -34,6 +34,8 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         one_to_one_fields = self.create_one_to_one_fields(validated_data)
 
         # create main model obj
+        if 'uuid' in validated_data:
+            del validated_data['uuid']
         new_model_object = self.Meta.model.objects.create(
             **validated_data, **one_to_one_fields
         )
@@ -87,6 +89,8 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
                 raise FieldError('One to one field object requires a user field, but no user info provided. Please make sure you login.')
 
             # create model object
+            if 'uuid' in one_to_one_data:
+                del one_to_one_data['uuid']
             one_to_one_fields[field_name] = model.objects.create(**one_to_one_data)
             
         return one_to_one_fields
@@ -180,7 +184,7 @@ class ApplicationSerializer(BaseSerializer):
 
     # foreign key & frontend use uuid to specify (write to this field) the target company
     # the `queryset=...` arg is for lookup the company obj by uuid from frontend
-    user_company = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Company.objects.all())
+    user_company = serializers.PrimaryKeyRelatedField(read_only=False, required=False, queryset=models.Company.objects.all())
 
     job_description_page = LinkSerializer(many=False) # onetoone
     job_source = LinkSerializer(many=False) # onetoone
@@ -313,27 +317,36 @@ class ApplicationStatusSerializer(BaseSerializer):
         )
 
     def create(self, validated_data):
-        new_application_status = models.ApplicationStatus.objects.create(
-            text=validated_data.pop('text'), 
-            application=validated_data.pop('application'), 
-            date=validated_data.pop('date'),
-            order=validated_data.get('date', None)
+        new_application_status = ApiUtils.create_instance(
+            models.ApplicationStatus,
+            validated_data
         )
+        # new_application_status = models.ApplicationStatus.objects.create(
+        #     text=validated_data.pop('text'), 
+        #     application=validated_data.pop('application'), 
+        #     date=validated_data.pop('date'),
+        #     order=validated_data.get('date', '')
+        # )
 
         application_status_links_data_list = validated_data.pop('applicationstatuslink_set')
         for application_status_link_data in application_status_links_data_list:
             # create link obj
-            new_link = models.Link.objects.create(**{
-                **application_status_link_data['link'],
-                'user': new_application_status.application.user,
-            })
-
+            new_link = ApiUtils.create_instance(
+                models.Link,
+                {
+                    **application_status_link_data['link'],
+                    'user': new_application_status.application.user,
+                },
+            )
             # create application status link obj
-            new_application_status_link = models.ApplicationStatusLink.objects.create(**{
-                'link': new_link,
-                'application_status': new_application_status,
-                'user': new_application_status.application.user,
-            })
+            new_application_status_link = ApiUtils.create_instance(
+                models.ApplicationStatusLink,
+                {
+                    'link': new_link,
+                    'application_status': new_application_status,
+                    'user': new_application_status.application.user,
+                }
+            )
         
-
+        
         return new_application_status
