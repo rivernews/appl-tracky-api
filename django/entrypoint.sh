@@ -17,7 +17,7 @@ fi
 
 # this will only run on a fresh provision and the following.
 # if you do `flush`, then this `migrate` will not work
-# python manage.py makemigrations
+python manage.py makemigrations
 # python manage.py makemigrations api
 python manage.py migrate
 
