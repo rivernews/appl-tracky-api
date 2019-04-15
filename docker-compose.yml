@@ -14,7 +14,7 @@ services:
   web:
     build: ./django
     image: ${AWS_ECR_WEB_REPO_URI}:latest
-    command: gunicorn django_server.wsgi:application --bind 0.0.0.0:8000
+    # command: gunicorn django_server.wsgi:application --bind 0.0.0.0:8000
     volumes:
       # - ./django/:/usr/src/django/
       - global_static:/usr/src/django/global_static
