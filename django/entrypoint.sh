@@ -18,11 +18,15 @@ fi
 # this will only run on a fresh provision and the following.
 # if you do `flush`, then this `migrate` will not work
 python manage.py makemigrations
+python manage.py makemigrations api
 python manage.py migrate
 
 python manage.py collectstatic --clear --noinput
 python manage.py collectstatic --no-input
 python manage.py initialize_superuser
-# exec "$@"
-echo Starting gunicorn...
-gunicorn django_server.wsgi:application --bind 0.0.0.0:8000
+
+# echo Starting gunicorn...
+# gunicorn django_server.wsgi:application --bind 0.0.0.0:8000
+
+# https://stackoverflow.com/questions/41435014/why-am-i-unable-to-run-django-migrations-via-the-docker-compose-run-web-comman/41436850
+exec "$@"
