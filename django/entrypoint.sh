@@ -26,4 +26,7 @@ python manage.py collectstatic --no-input
 python manage.py initialize_superuser
 
 # echo Starting gunicorn...
-gunicorn django_server.wsgi:application --bind 0.0.0.0:8000
+# how many workers: https://stackoverflow.com/questions/15979428/what-is-the-appropriate-number-of-gunicorn-workers-for-each-amazon-instance-type
+gunicorn django_server.wsgi:application --forwarded-allow-ips="*" \
+--workers=$((2 * $(getconf _NPROCESSORS_ONLN) + 1)) \
+--bind 0.0.0.0:8000
