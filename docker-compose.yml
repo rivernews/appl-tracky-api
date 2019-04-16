@@ -23,14 +23,19 @@ services:
     # env_file:
     #   - web.configs
     environment:
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY} # secret
       - DATABASE=postgres
       - SQL_ENGINE=django.db.backends.postgresql
-      - SQL_DATABASE=${SQL_DATABASE}
-      - SQL_USER=${SQL_USER}
-      - SQL_PASSWORD=${SQL_PASSWORD}
-      - SQL_HOST=${SQL_HOST}
+      - SQL_DATABASE=${SQL_DATABASE} # secret
+      - SQL_USER=${SQL_USER} # secret
+      - SQL_PASSWORD=${SQL_PASSWORD} # secret
+      - SQL_HOST=${SQL_HOST} # secret
       - SQL_PORT=5432
+      - EMAIL_HOST=${EMAIL_HOST} # secret
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER} # secret
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD} # secret
+      - EMAIL_PORT=${EMAIL_PORT} # secret
+      - ADMINS=${ADMINS} # secret
     depends_on:
       - db
   db:

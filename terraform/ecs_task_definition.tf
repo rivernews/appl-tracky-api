@@ -134,6 +134,26 @@ resource "aws_ecs_task_definition" "test" {
         {
           "name": "SQL_USER",
           "valueFrom": "${data.aws_ssm_parameter.sql-user.arn}"
+        },
+        {
+          "name": "EMAIL_HOST",
+          "valueFrom": "${data.aws_ssm_parameter.email-host.arn}"
+        },
+        {
+          "name": "EMAIL_HOST_USER",
+          "valueFrom": "${data.aws_ssm_parameter.email-host-user.arn}"
+        },
+        {
+          "name": "EMAIL_HOST_PASSWORD",
+          "valueFrom": "${data.aws_ssm_parameter.email-host-password.arn}"
+        },
+        {
+          "name": "EMAIL_PORT",
+          "valueFrom": "${data.aws_ssm_parameter.email-port.arn}"
+        },
+        {
+          "name": "ADMINS",
+          "valueFrom": "${data.aws_ssm_parameter.admins.arn}"
         }
       ],
       "dockerSecurityOptions": [],

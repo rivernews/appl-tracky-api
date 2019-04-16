@@ -24,6 +24,7 @@ urlpatterns = [
     # Django views
     url(r'^$', views.ApiHomeView.as_view(), name='homepage'),
     url(r'^home/$', views.ApiHomeView.as_view(), name='homepage-home'),
+    url(r'^health-check', views.ApiHomeView.as_view(), name='homepage-home'),
 
     # social auth endpoints
     # https://github.com/st4lk/django-rest-social-auth/blob/master/rest_social_auth/urls_jwt.py

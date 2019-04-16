@@ -15,13 +15,28 @@ from . import permissions as ApiPermissions
 
 from . import utils as ApiUtils
 
+# for health check combining with db migration check
+# https://engineering.instawork.com/elegant-database-migrations-on-ecs-74f3487da99f
+from django.db import DEFAULT_DB_ALIAS, connections
+from django.db.migrations.executor import MigrationExecutor
+from django.http import HttpResponse
+
 # Create your views here.
 class ApiHomeView(TemplateView):
     template_name = 'api/api-index.html'
 
     def get(self, request, *arg, **kwargs):
-        print("Hey ya! Index view accessed, user is:", request.user)
-        return super().get(request, *arg, **kwargs)
+        print("INFO: home view GET accessed, user is:", request.user)
+        executor = MigrationExecutor(connections[DEFAULT_DB_ALIAS])
+        plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
+        if not plan:
+            print("INFO: passing database migration check, no pending migration.")
+            return super().get(request, *arg, **kwargs)
+        else:
+            print("ERROR: pending database migration exists. Will stop and respond 503, please do the migration first so Django can be ready to serve request.")
+            status = 503
+            return HttpResponse(status=status)
+        
 
 
 class SocialAuthView(SocialJWTUserAuthView):
