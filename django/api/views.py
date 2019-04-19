@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, PermissionDenied
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -172,38 +172,20 @@ class ApplicationStatusViewSet(BaseModelViewSet):
         """
         # since DRF doesn't handle one-to-many update for us, we need to start from scratch - from request.data, before we call the serializer class.
         data_list = self.request.data.get('applicationstatuslink_set', [])
-
-        # we map the instance data provided from frontend form, to instances in the database
-        # particularly, if it's not in database, we interpret this as a create request and create their instances
-        appstatuslink_instances_list = []
-        for data in data_list:
-            uuid = data.get('uuid', None)
-            if uuid == '':
-                uuid = None
-
-            is_created = None
-            if self.request.user.is_superuser:
-                update_instance, is_created = models.ApplicationStatusLink.objects.get_or_create(uuid=uuid)
-            else:
-                update_instance, is_created  = models.ApplicationStatusLink.objects.get_or_create(uuid=uuid, user=self.request.user)
-            
-            if is_created:
-                data['uuid'] = str(update_instance.uuid)
-            
-            appstatuslink_instances_list.append(update_instance)
-        
         list_serializer = ApiSerializers.ApplicationStatusLinkSerializer(
-            appstatuslink_instances_list, 
+            # appstatuslink_instances_list, 
+            serializer.instance.applicationstatuslink_set.all(), 
             data=data_list, 
             many=True, 
-            context={
-                'request': self.request,
-                'parent_instance': serializer.instance,
-            },
+            context={'request': self.request},
         )
 
+        # below code will trigger `update()` of the serializer, and commit to database
         if list_serializer.is_valid():
-            list_serializer.save()
+            list_serializer.save(
+                user=self.request.user,
+                application_status=serializer.instance,
+            )
         else:
             raise serializers.ValidationError(str(list_serializer.errors)) 
 

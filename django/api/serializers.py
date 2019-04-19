@@ -231,62 +231,41 @@ class ApplicationStatusLinkListSerializer(serializers.ListSerializer):
             we interpret this as a delete request
         """
 
-        # expect `perform_update()` in viewset to send the `parent_instance` over here
-        parent_instance = self.context.get('parent_instance', None)
-        if not parent_instance:
-            return
-        
         # pull out the entire reverse foreign key set, so when an object is missing, we know what to delete
-        all_instance_table = { str(in_db_instance.uuid): in_db_instance for in_db_instance in parent_instance.applicationstatuslink_set.all() }
+        all_instance_table = { str(in_db_instance.uuid): in_db_instance for in_db_instance in instance }
 
-        # prepare tables for the target update instance, and the data that will be used for update
-        update_instance_table = { str(update_instance.uuid): update_instance for update_instance in instance }
-        update_data_table = { instance_data['uuid']: instance_data for instance_data in validated_data }
+        update_data_table = { update_instance_data['uuid']: update_instance_data for update_instance_data in validated_data }
 
         # handle update or create
         update_data_uuids = list(update_data_table.keys())
+        update_instances = []
         for data_uuid in update_data_uuids:
             
             # update - object is in both database and frontend form data
-            if data_uuid in all_instance_table and data_uuid in update_instance_table:
-                target_update_instance = all_instance_table.pop(data_uuid)
+            if data_uuid in all_instance_table:
                 target_data = update_data_table.pop(data_uuid)
-                
-                # update target_instance by target_data from validated_data
-                appStatusLinkSeriazlier = ApplicationStatusLinkSerializer(
-                    # give an instance to serializer for update mode
+                target_update_instance = all_instance_table.pop(data_uuid)
+                update_instance = self.child.update(
                     target_update_instance,
-                    data=target_data
+                    target_data
                 )
-
-                # also pop out from update_instance_table. (optional, just in case so no duplicated operation in following code)
-                update_instance_table.pop(data_uuid)
+                update_instances.append(update_instance)
 
             # create - object is not in database, but frontend form sends it over here
-            elif data_uuid in update_instance_table:
-                created_instance = update_instance_table.pop(data_uuid)
-                target_data = update_data_table.pop(data_uuid)
-                # create it by target_data from validated_data
-                # when create mode, no need to pass instance to serializer class
-                appStatusLinkSeriazlier = ApplicationStatusLinkSerializer(
-                    data=target_data
-                )
-            
-            # commit the transaction to database
-            if appStatusLinkSeriazlier.is_valid(raise_exception=False):
-                appStatusLinkSeriazlier.save()
             else:
-                raise serializers.ValidationError(str(appStatusLinkSeriazlier.errors))
+                target_data = update_data_table.pop(data_uuid)
+                created_instance = self.child.create(target_data)
+                update_instances.append(created_instance)
 
         # handle delete
         for data_uuid, instance_to_delete in all_instance_table.items():
             instance_to_delete.delete()
 
-        return instance
+        return update_instances
 
 
 class ApplicationStatusLinkSerializer(BaseSerializer):
-
+    user = serializers.PrimaryKeyRelatedField(read_only=True,)
     link = LinkSerializer(many=False, read_only=False)
     application_status = serializers.PrimaryKeyRelatedField(read_only=True)
 
@@ -296,7 +275,7 @@ class ApplicationStatusLinkSerializer(BaseSerializer):
 
     class Meta:
         model = models.ApplicationStatusLink
-        fields = ('url', 'uuid', 'application_status', 'link', 'modified_at')
+        fields = ('url', 'uuid', 'application_status', 'link', 'modified_at', 'user')
 
         # when using `many=True` on ApplicationStatusLinkSerializer(many=True), will use the following class for deserialize
         list_serializer_class = ApplicationStatusLinkListSerializer
