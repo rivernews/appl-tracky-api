@@ -67,18 +67,18 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         else:
             return self.model.objects.all()
     
-    def perform_create(self, serializer):
-        """
-            After serializer's .is_valid() call:
-            The create() method of our serializer will now be passed 
-            an additional 'user' field, along with the validated data from the request.
+    # def perform_create(self, serializer):
+    #     """
+    #         After serializer's .is_valid() call:
+    #         The create() method of our serializer will now be passed 
+    #         an additional 'user' field, along with the validated data from the request.
             
-            refer to: https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/
-        """
-        if ApiUtils.is_model_field_exist(self.model, 'user'):
-            serializer.save(user=self.request.user)
-        else:
-            serializer.save()
+    #         refer to: https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/
+    #     """
+    #     if ApiUtils.is_model_field_exist(self.model, 'user'):
+    #         serializer.save(user=self.request.user)
+    #     else:
+    #         serializer.save()
 
 class UserViewSet(BaseModelViewSet):
     """

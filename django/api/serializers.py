@@ -21,23 +21,35 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
     }, ...]
     """
     one_to_one_fields = {}
-    model_user_field_data = None
 
     def create(self, validated_data):
         """
-            In order to use nested serializer fields, you have to write this .create() function
+            What this function is for:
+                After Serializer validated data, define how should object be created.
+                You can consider use super().create() to build on the default behavior.
+            What to do:
+                You will create relational instances manually by `Model.objects.create(...)`,
+            What to return:
+                Return the created instance.
+            
+            See https://www.django-rest-framework.org/api-guide/serializers/#writing-create-methods-for-nested-representations
+
+            ** In order to use nested serializer fields, you have to write this .create() function
         """
-        # handle optional user field for model
-        self.model_user_field_data = validated_data.get('user', None)
 
         # create relational objects
-        one_to_one_fields = self.create_one_to_one_fields(validated_data)
+        one_to_one_fields_data = self.create_one_to_one_fields(validated_data)
 
-        # create main model obj
+        # remove uuid to avoid writing to uuid field
         if 'uuid' in validated_data:
             del validated_data['uuid']
+        
+        # include user info whenever possible
+        self.inject_user_info_data(self.Meta.model, validated_data)
+        
+        # create main model obj
         new_model_object = self.Meta.model.objects.create(
-            **validated_data, **one_to_one_fields
+            **validated_data, **one_to_one_fields_data
         )
         return new_model_object
     
@@ -50,18 +62,24 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
 
             Particularly, it will handle one-to-one fields
         """
-        # import ipdb; ipdb.set_trace()
         self.update_one_to_one_fields(instance, validated_data)
+
+        # include user info whenever possible
+        self.inject_user_info_data(self.Meta.model, validated_data)
+
+        # update subject model instance
         ApiUtils.update_instance(instance, validated_data, self.one_to_one_fields)
 
         return instance
     
     def update_one_to_one_fields(self, instance, validated_data):
-
         for field_name, model in self.one_to_one_fields.items():
             if field_name in validated_data and ApiUtils.is_instance_field_exist(instance, field_name):
                 # data is provided (and specified by serializer's one_to_one_fields)
                 one_to_one_data = validated_data.pop(field_name)
+
+                # include user info if necessary; TODO: we should not need to do this for update; just for debug purpose where previous bug let `user` field blank
+                self.inject_user_info_data(model, one_to_one_data)
 
                 # update the one to one field object on instance
                 one_to_one_field_instance = getattr(instance, field_name)
@@ -70,7 +88,6 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
                     # after we update, we don't need to update subject instance since it references to that one to one model
                     ApiUtils.update_instance(one_to_one_field_instance, one_to_one_data)
 
-    
     def create_one_to_one_fields(self, validated_data):
         one_to_one_fields = {}
         for field_name, model in self.one_to_one_fields.items():
@@ -82,11 +99,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
             one_to_one_data = validated_data.pop(field_name)
 
             # include user info if necessary
-            is_user_field_exist = ApiUtils.is_model_field_exist(model, 'user')
-            if self.model_user_field_data and is_user_field_exist:
-                one_to_one_data = { **one_to_one_data, 'user': self.model_user_field_data }
-            elif (not self.model_user_field_data) and is_user_field_exist:
-                raise FieldError('One to one field object requires a user field, but no user info provided. Please make sure you login.')
+            self.inject_user_info_data(model, one_to_one_data)
 
             # create model object
             if 'uuid' in one_to_one_data:
@@ -94,6 +107,15 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
             one_to_one_fields[field_name] = model.objects.create(**one_to_one_data)
             
         return one_to_one_fields
+    
+    def inject_user_info_data(self, model, one_to_one_data):
+        if ApiUtils.is_model_field_exist(model, 'user'):
+                request = self.context.get('request', None)
+                if request:
+                    if request.user.is_authenticated:
+                        one_to_one_data['user'] = request.user
+                    else:
+                        raise FieldError('One to one field object requires a user field, but user is not authenticated. Please make sure you login.')
     
     class Meta:
         model = None
