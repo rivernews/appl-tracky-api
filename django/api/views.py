@@ -26,11 +26,9 @@ class ApiHomeView(TemplateView):
     template_name = 'api/api-index.html'
 
     def get(self, request, *arg, **kwargs):
-        print("INFO: home view GET accessed, user is:", request.user)
         executor = MigrationExecutor(connections[DEFAULT_DB_ALIAS])
         plan = executor.migration_plan(executor.loader.graph.leaf_nodes())
         if not plan:
-            print("INFO: passing database migration check, no pending migration.")
             return super().get(request, *arg, **kwargs)
         else:
             print("ERROR: pending database migration exists. Will stop and respond 503, please do the migration first so Django can be ready to serve request.")
