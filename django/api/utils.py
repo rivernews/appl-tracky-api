@@ -20,6 +20,9 @@ def get_model_all_field_names(model):
 def create_instance(model, fields_data: dict, excluded_fields: dict = {}) -> None:
     valid_field_names = get_model_all_field_names(model)
 
+    # make sure don't write to uuid
+    excluded_fields['uuid'] = True
+
     create_instance_kwargs = {}
     for valid_field_name in valid_field_names:
         # only update fields that are in model's schema
@@ -36,6 +39,9 @@ def create_instance(model, fields_data: dict, excluded_fields: dict = {}) -> Non
     
 def update_instance(instance, fields_data: dict, excluded_fields: dict = {}) -> None:
     valid_field_names = get_model_all_field_names(instance.__class__)
+
+    # make sure don't write to uuid
+    excluded_fields['uuid'] = True
 
     for valid_field_name in valid_field_names:
         # only update fields that are in model's schema

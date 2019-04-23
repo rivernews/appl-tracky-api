@@ -48,9 +48,9 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         self.inject_user_info_data(self.Meta.model, validated_data)
         
         # create main model obj
-        new_model_object = self.Meta.model.objects.create(
+        new_model_object = ApiUtils.create_instance(self.Meta.model, {
             **validated_data, **one_to_one_fields_data
-        )
+        })
         return new_model_object
     
     def update(self, instance, validated_data):
