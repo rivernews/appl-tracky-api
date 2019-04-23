@@ -41,8 +41,8 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         one_to_one_fields_data = self.create_one_to_one_fields(validated_data)
 
         # remove uuid to avoid writing to uuid field
-        if 'uuid' in validated_data:
-            del validated_data['uuid']
+        # if 'uuid' in validated_data:
+        #     del validated_data['uuid']
         
         # include user info whenever possible
         self.inject_user_info_data(self.Meta.model, validated_data)
@@ -73,13 +73,13 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         return instance
     
     def update_one_to_one_fields(self, instance, validated_data):
-        for field_name, model in self.one_to_one_fields.items():
+        for field_name, instance_model in self.one_to_one_fields.items():
             if field_name in validated_data and ApiUtils.is_instance_field_exist(instance, field_name):
                 # data is provided (and specified by serializer's one_to_one_fields)
                 one_to_one_data = validated_data.pop(field_name)
 
                 # include user info if necessary; TODO: we should not need to do this for update; just for debug purpose where previous bug let `user` field blank
-                self.inject_user_info_data(model, one_to_one_data)
+                self.inject_user_info_data(instance_model, one_to_one_data)
 
                 # update the one to one field object on instance
                 one_to_one_field_instance = getattr(instance, field_name)
@@ -90,7 +90,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
 
     def create_one_to_one_fields(self, validated_data):
         one_to_one_fields = {}
-        for field_name, model in self.one_to_one_fields.items():
+        for field_name, instance_model in self.one_to_one_fields.items():
 
             """
                 creating one to one fields
@@ -99,12 +99,10 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
             one_to_one_data = validated_data.pop(field_name)
 
             # include user info if necessary
-            self.inject_user_info_data(model, one_to_one_data)
+            self.inject_user_info_data(instance_model, one_to_one_data)
 
             # create model object
-            if 'uuid' in one_to_one_data:
-                del one_to_one_data['uuid']
-            one_to_one_fields[field_name] = model.objects.create(**one_to_one_data)
+            one_to_one_fields[field_name] = ApiUtils.create_instance(instance_model, one_to_one_data)
             
         return one_to_one_fields
     

@@ -17,17 +17,15 @@ def is_model_field_exist(model, field_name):
 def get_model_all_field_names(model):
     return [ field.name for field in model._meta.get_fields() ]
 
-def create_instance(model, fields_data: dict, excluded_fields: dict = {}) -> None:
+def create_instance(model, fields_data: dict, excluded_fields={}) -> None:
     valid_field_names = get_model_all_field_names(model)
-
-    # make sure don't write to uuid
-    excluded_fields['uuid'] = True
 
     create_instance_kwargs = {}
     for valid_field_name in valid_field_names:
         # only update fields that are in model's schema
         # any redundent field data provided from frontend will be ignored
-        if valid_field_name in fields_data and (not valid_field_name in excluded_fields):
+        # also make sure don't write to uuid
+        if valid_field_name != 'uuid' and valid_field_name in fields_data and (not valid_field_name in excluded_fields):
 
             # if have no meaningful data, then skip it and don't even pass in into .objects.create()
             if fields_data[valid_field_name] != None and fields_data[valid_field_name] != '':
@@ -40,13 +38,11 @@ def create_instance(model, fields_data: dict, excluded_fields: dict = {}) -> Non
 def update_instance(instance, fields_data: dict, excluded_fields: dict = {}) -> None:
     valid_field_names = get_model_all_field_names(instance.__class__)
 
-    # make sure don't write to uuid
-    excluded_fields['uuid'] = True
-
     for valid_field_name in valid_field_names:
         # only update fields that are in model's schema
         # any redundent field data provided from frontend will be ignored
-        if valid_field_name in fields_data and (not valid_field_name in excluded_fields):
+        # also make sure don't write to uuid
+        if valid_field_name != 'uuid' and valid_field_name in fields_data and (not valid_field_name in excluded_fields):
             setattr(instance, valid_field_name, fields_data.get(valid_field_name))
     
     instance.save()
