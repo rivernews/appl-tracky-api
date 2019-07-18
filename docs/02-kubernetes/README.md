@@ -1,0 +1,1 @@
+- Mainly shadowing the [digitalocean CI/CD tutorial](https://www.digitalocean.com/community/tutorials/how-to-automate-deployments-to-digitalocean-kubernetes-with-circleci), while trying to write Terraform modules to provision the steps.
