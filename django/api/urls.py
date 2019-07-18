@@ -3,7 +3,7 @@ from django.conf.urls import url, include
 from rest_framework import routers
 from . import views
 
-from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 # REST Framework routes
 router = routers.DefaultRouter()
@@ -35,6 +35,7 @@ urlpatterns = [
     
     # JWT token endpoint
     url(r'^api/api-token-auth/', obtain_jwt_token),
+    url(r'^api/api-token-refresh/', refresh_jwt_token),
 
     # API endpoints
     url(r'^api/', include(router.urls)),

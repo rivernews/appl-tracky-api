@@ -1,3 +1,5 @@
+from rest_framework.settings import api_settings
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import FieldDoesNotExist, FieldError
 from django.contrib.auth.models import Group
@@ -36,7 +38,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
 
             ** In order to use nested serializer fields, you have to write this .create() function
         """
-
+        
         # create relational objects
         one_to_one_fields_data = self.create_one_to_one_fields(validated_data)
 
@@ -117,6 +119,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = None
+        fields = (api_settings.URL_FIELD_NAME, 'uuid', 'modified_at')
 
 class UserSerializer(BaseSerializer):
     """
@@ -124,7 +127,7 @@ class UserSerializer(BaseSerializer):
     """
     class Meta:
         model = get_user_model()
-        fields = ('url', 'email', 'first_name', 'last_name')
+        fields = (api_settings.URL_FIELD_NAME, 'email', 'first_name', 'last_name')
 
 
 class SocialAuthUserSerializer(UserJWTSerializer):
@@ -139,7 +142,7 @@ class SocialAuthUserSerializer(UserJWTSerializer):
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Group
-        fields = ('url', 'name')
+        fields = (api_settings.URL_FIELD_NAME, 'name')
 
 """
     Main Data Model
@@ -148,7 +151,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 class AddressSerializer(BaseSerializer):
     class Meta:
         model = models.Address
-        fields = ('url', 'uuid', 'place_name', 'country', 'state', 'street', 'full_address', 'zipcode', 'modified_at')
+        fields = ('place_name', 'country', 'state', 'street', 'full_address', 'zipcode') + BaseSerializer.Meta.fields
 
 class LinkSerializer(BaseSerializer):
     # setup user upon creation, see https://stackoverflow.com/questions/32509815/django-rest-framework-get-data-from-foreign-key-relation
@@ -159,7 +162,7 @@ class LinkSerializer(BaseSerializer):
 
     class Meta:
         model = models.Link
-        fields = ('url', 'uuid', 'text', 'user', 'url', 'order', 'modified_at')
+        fields = ('text', 'user', 'url', 'order') + BaseSerializer.Meta.fields
 
 class CompanySerializer(BaseSerializer):
     # setup user upon creation, see https://stackoverflow.com/questions/32509815/django-rest-framework-get-data-from-foreign-key-relation
@@ -178,7 +181,7 @@ class CompanySerializer(BaseSerializer):
 
     class Meta:
         model = models.Company
-        fields = ('url', 'uuid', 'user', 'labels', 'name', 'hq_location', 'home_page', 'modified_at')
+        fields = ('user', 'labels', 'name', 'hq_location', 'home_page') + BaseSerializer.Meta.fields
     
 class CompanyRatingSerializer(BaseSerializer):
 
@@ -192,12 +195,12 @@ class CompanyRatingSerializer(BaseSerializer):
 
     class Meta:
         model = models.CompanyRating
-        fields = ('url', 'uuid', 'source', 'value', 'company', 'sample_date', 'modified_at')
+        fields = ('source', 'value', 'company', 'sample_date') + BaseSerializer.Meta.fields
 
 class LabelSerializer(BaseSerializer):
     class Meta:
         model = models.Label
-        fields = ('url', 'uuid', 'user', 'text', 'color', 'order', 'modified_at')
+        fields = ('user', 'text', 'color', 'order') + BaseSerializer.Meta.fields
 
 class ApplicationSerializer(BaseSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True) # foreign jey
@@ -217,10 +220,10 @@ class ApplicationSerializer(BaseSerializer):
     class Meta:
         model = models.Application
         fields = (
-            'url', 'uuid', 'user', 
+            'user', 
             'user_company', 'position_title', 
             'job_description_page', 'job_source', 
-            'labels', 'modified_at')
+            'labels') + BaseSerializer.Meta.fields
     
 class PositionLocationSerializer(BaseSerializer):
 
@@ -234,7 +237,7 @@ class PositionLocationSerializer(BaseSerializer):
 
     class Meta:
         model = models.PositionLocation
-        fields = ('url', 'uuid', 'application', 'location', 'modified_at')
+        fields = ('application', 'location') + BaseSerializer.Meta.fields
 
 
 class ApplicationStatusLinkListSerializer(serializers.ListSerializer):
@@ -295,7 +298,7 @@ class ApplicationStatusLinkSerializer(BaseSerializer):
 
     class Meta:
         model = models.ApplicationStatusLink
-        fields = ('url', 'uuid', 'application_status', 'link', 'modified_at', 'user')
+        fields = ('application_status', 'link', 'user') + BaseSerializer.Meta.fields
 
         # when using `many=True` on ApplicationStatusLinkSerializer(many=True), will use the following class for deserialize
         list_serializer_class = ApplicationStatusLinkListSerializer
@@ -309,11 +312,11 @@ class ApplicationStatusSerializer(BaseSerializer):
     class Meta:
         model = models.ApplicationStatus
         fields = (
-            'url', 'uuid', 'text', 'application', 'date', 'order', 'modified_at', 
+            'text', 'application', 'date', 'order', 
             
             # computed properties
             'applicationstatuslink_set', 
-        )
+        ) + BaseSerializer.Meta.fields
 
     def create(self, validated_data):
         new_application_status = ApiUtils.create_instance(

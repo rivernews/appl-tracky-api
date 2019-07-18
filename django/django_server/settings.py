@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -168,6 +169,9 @@ AUTH_USER_MODEL = 'api.CustomUser'
 # https://www.django-rest-framework.org/tutorial/quickstart/#pagination
 
 REST_FRAMEWORK = {
+    # Hyperlink model
+    'URL_FIELD_NAME': 'api_url',
+
     # Scalability - pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
@@ -183,8 +187,6 @@ REST_FRAMEWORK = {
         'user': '60/min'
     },
     
-    # JWT settings
-    # http://getblimp.github.io/django-rest-framework-jwt/
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated', # this will make all endpoints require login by default for all CRUD operations.
     ),
@@ -198,6 +200,14 @@ REST_FRAMEWORK = {
 # if DEBUG:
 #     REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = ('rest_framework.permissions.AllowAny',)
 
+
+# JWT settings
+# http://getblimp.github.io/django-rest-framework-jwt/
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+}
 
 # Social Auth
 # https://github.com/st4lk/django-rest-social-auth

@@ -57,9 +57,9 @@ class Address(ManagedBaseModel):
         verbose_name_plural = "addresses"
 
 class Link(ManagedBaseModel):
-    text = models.CharField(blank=True, max_length=200)
+    text = models.CharField(blank=True, max_length=200, default='Link')
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True) # null to determine if it's pre-populated link or user input link
-    url = models.CharField(null=True, blank=True, max_length=500)
+    url = models.CharField(blank=True, max_length=500, default='#')
     order = models.IntegerField(null=True, blank=True, default=0)
 
     def __str__(self):
