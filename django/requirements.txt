@@ -5,7 +5,7 @@ gunicorn == 19.9.0
 awscli
 
 
-djangorestframework==3.9.0
+djangorestframework>=3.9.1
 django-cors-headers==2.4.0
 djangorestframework-jwt >= 1.11,<1.12
 
