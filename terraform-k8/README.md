@@ -1,5 +1,0 @@
-- Writing Terraform modules for K8 and digitalocean.
-    - [Creating cluster and k8 config](https://github.com/vranystepan/dok8s-terraform-example-1/blob/master/main.tf).
-- [Writing Terraform modules to install Helm in K8](https://github.com/vranystepan/dok8s-terraform-example-1/blob/master/main.tf).
-- Know how to organize Terraform [in a modular way](https://github.com/devans10/blog/tree/master/terraform).
-- Docker: [example provisioning dockercfg](https://www.daveevans.us/posts/deploying-my-blog-on-kubernetes/), and a [enhanced version you should also include](http://aethereal.io/2017/11/18/k8s-and-tf.html).
