@@ -57,6 +57,7 @@ ALLOWED_HOSTS = ['*']
 CORS_ORIGIN_WHITELIST = (
     'localhost:3000',
     'appl-tracky-api-https.shaungc.com',
+    'appl-tracky.api.shaungc.com',
     'rivernews.github.io'
 )
 
