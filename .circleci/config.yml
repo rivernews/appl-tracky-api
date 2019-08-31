@@ -6,6 +6,7 @@ version: 2.1
 
 base_environment: &base_environment
   IMAGE_NAME: shaungc/appl-tracky-api
+  DEPLOYED_DOMAIN_NAME: appl-tracky.api.shaungc.com
 
 # doc: https://circleci.com/orbs/registry/orb/circleci/slack
 orbs:
@@ -17,7 +18,6 @@ jobs:
       - image: circleci/buildpack-deps:stretch
     environment:
       <<: *base_environment
-      DEPLOYED_DOMAIN_NAME: appl-tracky.api.shaungc.com
     working_directory: ~/app
     steps:
       - checkout # retrieves the code from GitHub
@@ -66,10 +66,12 @@ jobs:
   report:
     docker:
       - image: circleci/buildpack-deps:curl
+    environment:
+      <<: *base_environment
     steps:
       - slack/status:
           mentions: 'here,'
-          success_message: "*Published - Iriversland*\nIriversland is ready to be accessed (http://${DEPLOYED_DOMAIN_NAME}).\nHash: ${CIRCLE_SHA1}\nHashed url (http://${CIRCLE_SHA1}.api.shaungc.com).\nDjango health check (http://${CIRCLE_SHA1}.api.shaungc.com/django-health-check/).\nDjango fail test (http://${CIRCLE_SHA1}.api.shaungc.com/fail-test/).\nDjango admin portal (http://${CIRCLE_SHA1}.api.shaungc.com/admin/)."
+          success_message: "*Published - Appl Tracky*\Appl Tracky is ready to be accessed (http://${DEPLOYED_DOMAIN_NAME}).\nHash: ${CIRCLE_SHA1}\nHashed url (http://${CIRCLE_SHA1}.${DEPLOYED_DOMAIN_NAME}).\nDjango health check (http://${CIRCLE_SHA1}.${DEPLOYED_DOMAIN_NAME}/django-health-check/).\nDjango fail test (http://${CIRCLE_SHA1}.${DEPLOYED_DOMAIN_NAME}/fail-test/).\nDjango admin portal (http://${CIRCLE_SHA1}.${DEPLOYED_DOMAIN_NAME}/admin/)."
 
 
 # circleci doc: https://circleci.com/docs/2.0/workflows/#fan-outfan-in-workflow-example
