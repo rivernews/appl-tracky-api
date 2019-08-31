@@ -25,7 +25,7 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            docker build -f django/Dockerfile -t $IMAGE_NAME:latest .
+            docker build -f django/Dockerfile -t $IMAGE_NAME:latest django
       - run:
           name: Push Docker Image
           command: |
