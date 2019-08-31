@@ -1,0 +1,89 @@
+version: 2.1
+
+# yaml basic and advance: https://circleci.com/docs/2.0/writing-yaml/#section=configuration
+
+# sharing data between jobs: https://circleci.com/docs/2.0/workflows/#using-workspaces-to-share-data-among-jobs
+
+base_environment: &base_environment
+  IMAGE_NAME: shaungc/appl-tracky-api
+
+# doc: https://circleci.com/orbs/registry/orb/circleci/slack
+orbs:
+  slack: circleci/slack@3.3.0
+
+jobs:
+  build:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    environment:
+      <<: *base_environment
+      DEPLOYED_DOMAIN_NAME: appl-tracky.api.shaungc.com
+    working_directory: ~/app
+    steps:
+      - checkout # retrieves the code from GitHub
+      - setup_remote_docker # sets up a remote, isolated environment for each build. This is required before you use any docker command inside a job step.
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -f django/Dockerfile -t $IMAGE_NAME:latest .
+      - run:
+          name: Push Docker Image
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker tag $IMAGE_NAME:latest $IMAGE_NAME:$CIRCLE_SHA1
+            docker push $IMAGE_NAME:latest
+            docker push $IMAGE_NAME:$CIRCLE_SHA1
+  
+  # deploy:
+  #   docker:
+  #     # https://hub.docker.com/r/hashicorp/terraform/tags
+  #     - image: shaungc/terraform-kubectl-image
+  #   environment:
+  #     <<: *base_environment
+  #     TF_REMOTE_GIT_REPO: https://github.com/rivernews/terraform-provisioning.git
+  #   working_directory: /terraform # set default directory to cloned github repo directory
+  #   steps:
+  #     - run:
+  #         name: Initialize Terraform
+  #         command: |
+  #           ls -l
+  #           chmod +x init-backend-cicd.sh
+  #           sh ./init-backend-cicd.sh
+  #           echo 'export TF_VAR_app_container_image_tag="${CIRCLE_SHA1}"' >> $BASH_ENV # not working!
+  #           env
+  #     - run:
+  #         name: Plan Terraform
+  #         command: |
+  #           source $BASH_ENV # this is necessary when using env var you set during `run:`
+  #           terraform plan
+  #           env
+  #     - run:
+  #         name: Apply Terraform
+  #         command: |
+  #           source $BASH_ENV # this is necessary when using env var you set during `run:`
+  #           terraform apply -auto-approve
+  
+  report:
+    docker:
+      - image: circleci/buildpack-deps:curl
+    steps:
+      - slack/status:
+          mentions: 'here,'
+          success_message: "*Published - Iriversland*\nIriversland is ready to be accessed (http://${DEPLOYED_DOMAIN_NAME}).\nHash: ${CIRCLE_SHA1}\nHashed url (http://${CIRCLE_SHA1}.api.shaungc.com).\nDjango health check (http://${CIRCLE_SHA1}.api.shaungc.com/django-health-check/).\nDjango fail test (http://${CIRCLE_SHA1}.api.shaungc.com/fail-test/).\nDjango admin portal (http://${CIRCLE_SHA1}.api.shaungc.com/admin/)."
+
+
+# circleci doc: https://circleci.com/docs/2.0/workflows/#fan-outfan-in-workflow-example
+workflows:
+  # version: 2
+  build-master:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: master
+      # - deploy:
+      #     requires:
+      #       - build
+      - report:
+          requires:
+            - build

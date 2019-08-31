@@ -1,22 +1,15 @@
+# dockerignore spec https://docs.docker.com/engine/reference/builder/#dockerignore-file
+
 **/venv
-**/venv/*
-django/venv/*
 
 **/.git
-.git/*
-**/.git/*
 
-**/terraform
-terraform/*
+**/*terraform*
 
 **/docs
-docs/*
-**/docs/*
 
 **/*.sqlite3
-django/db.sqlite3
 
 **/__pycache__
-**/__pycache__/*
-django/api/__pycache__/*
 
+**/*credential*
