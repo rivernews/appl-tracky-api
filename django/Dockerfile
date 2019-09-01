@@ -4,7 +4,7 @@ FROM python:3.7-alpine
 # set environment varibles
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-EXPOSE 8000
+# EXPOSE 8001
 
 RUN echo Copying all stuff into container...
 RUN mkdir -p /usr/src/django
