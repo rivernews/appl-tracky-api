@@ -32,4 +32,6 @@ echo We have $(getconf _NPROCESSORS_ONLN) cpu cores, we can spin up $((2 * $(get
 # --workers=$((2 * $(getconf _NPROCESSORS_ONLN) + 1)) \
 # --bind 0.0.0.0:8000
 
-gunicorn django_server.wsgi:application --workers=3 --bind 0.0.0.0:8000
+python manage.py runserver 8001
+
+# gunicorn django_server.wsgi:application --workers=3 --bind 0.0.0.0:8001
