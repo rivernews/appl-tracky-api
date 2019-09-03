@@ -27,7 +27,7 @@ try:
     from .credentials import *
     DEBUG = True
 except ImportError:
-    DEBUG = False
+    DEBUG = True # TODO set this to false
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
