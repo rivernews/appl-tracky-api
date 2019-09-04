@@ -56,7 +56,7 @@ ALLOWED_HOSTS = ['*']
 # for DRF to generate link that correspond to request w/ the correct scheme of http and https
 # https://docs.djangoproject.com/en/2.2/ref/settings/#secure-proxy-ssl-header
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True 
+# SECURE_SSL_REDIRECT = True 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
