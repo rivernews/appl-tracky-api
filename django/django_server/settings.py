@@ -53,6 +53,10 @@ INSTALLED_APPS = [
 
 ALLOWED_HOSTS = ['*']
 
+# for DRF to generate link that correspond to request w/ the correct scheme of http and https
+# https://docs.djangoproject.com/en/2.2/ref/settings/#secure-proxy-ssl-header
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # when 
 CORS_ORIGIN_WHITELIST = (
     'localhost:3000',
