@@ -33,4 +33,4 @@ echo We have $(getconf _NPROCESSORS_ONLN) cpu cores, we can spin up $((2 * $(get
 # --bind 0.0.0.0:8000
 
 # python manage.py runserver 0.0.0.0:8001
-gunicorn django_server.wsgi:application --forwarded-allow-ips="*" --workers=1 --bind 0.0.0.0:8001
+gunicorn django_server.wsgi:application --forwarded-allow-ips="*" --workers=1 --log-level info --bind 0.0.0.0:8001
