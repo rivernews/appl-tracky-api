@@ -39,6 +39,7 @@ class ApiHomeView(TemplateView):
         context = super().get_context_data(*args, **kwargs)
         context['is_secure'] = self.request.is_secure()
         context['build_absolute_uri'] = self.request.build_absolute_uri(None)
+        context['headers'] = self.request.META
 
         return context
 
