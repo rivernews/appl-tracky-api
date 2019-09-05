@@ -34,6 +34,12 @@ class ApiHomeView(TemplateView):
             print("ERROR: pending database migration exists. Will stop and respond 503, please do the migration first so Django can be ready to serve request.")
             status = 503
             return HttpResponse(status=status)
+    
+    def get_context_data(self,*args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['is_secure'] = self.request.is_secure()
+        context['build_absolute_uri'] = self.request.build_absolute_uri(None)
+
         
 
 
