@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 
 # django doc: https://docs.djangoproject.com/en/2.2/ref/settings/#allowed-hosts
 if not DEBUG:
-    ALLOWED_HOSTS = os.environ.get('DEPLOYED_DOMAIN', '.shaungc.com').split(',')
+    ALLOWED_HOSTS = os.environ.get('DEPLOYED_DOMAIN', '').split(',')
 else:
     ALLOWED_HOSTS = []
 
