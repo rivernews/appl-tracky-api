@@ -40,6 +40,8 @@ class ApiHomeView(TemplateView):
         context['is_secure'] = self.request.is_secure()
         context['build_absolute_uri'] = self.request.build_absolute_uri(None)
 
+        return context
+
         
 
 
