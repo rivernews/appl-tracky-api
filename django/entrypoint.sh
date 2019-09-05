@@ -27,10 +27,8 @@ python manage.py initialize_superuser
 
 # echo Starting gunicorn...
 # how many workers: https://stackoverflow.com/questions/15979428/what-is-the-appropriate-number-of-gunicorn-workers-for-each-amazon-instance-type
-echo We have $(getconf _NPROCESSORS_ONLN) cpu cores, we can spin up $((2 * $(getconf _NPROCESSORS_ONLN) + 1)) django workers...
-# gunicorn django_server.wsgi:application --forwarded-allow-ips="*" \
-# --workers=$((2 * $(getconf _NPROCESSORS_ONLN) + 1)) \
-# --bind 0.0.0.0:8000
+PROPER_WORKER_NUM=$((2 * $(getconf _NPROCESSORS_ONLN) + 1))
+echo We have $(getconf _NPROCESSORS_ONLN) cpu cores, we can spin up ${PROPER_WORKER_NUM} django workers...
 
 # python manage.py runserver 0.0.0.0:8001
-gunicorn django_server.wsgi:application --forwarded-allow-ips="*" --workers=1 --log-level info --bind 0.0.0.0:8001
+gunicorn django_server.wsgi:application --forwarded-allow-ips="*" --workers=${PROPER_WORKER_NUM} --log-level info --bind 0.0.0.0:8001
