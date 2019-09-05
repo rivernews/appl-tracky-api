@@ -37,13 +37,8 @@ class ApiHomeView(TemplateView):
     
     def get_context_data(self,*args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context['is_secure'] = self.request.is_secure()
-        context['build_absolute_uri'] = self.request.build_absolute_uri(None)
-        context['headers'] = self.request.META
-
+        context['context_test_msg'] = 'context passed in message successfully'
         return context
-
-        
 
 
 class SocialAuthView(SocialJWTUserAuthView):

@@ -29,6 +29,9 @@ try:
 except ImportError:
     DEBUG = False
 
+# You can also set DEBUG flag via env var, and this will overwrite it
+DEBUG = os.environ.get('DEBUG', DEBUG)
+
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 
@@ -48,31 +51,40 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
 ]
 
-# Django CORS header settings
-#
+# django doc: https://docs.djangoproject.com/en/2.2/ref/settings/#allowed-hosts
+if not DEBUG:
+    ALLOWED_HOSTS = os.environ.get('DEPLOYED_DOMAIN', '.shaungc.com').split(',')
+else:
+    ALLOWED_HOSTS = []
 
-ALLOWED_HOSTS = ['*']
-
-# for DRF to generate link that correspond to request w/ the correct scheme of http and https
+# For DRF to generate link that correspond to request w/ the correct scheme of http and https
 # https://docs.djangoproject.com/en/2.2/ref/settings/#secure-proxy-ssl-header
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# SECURE_SSL_REDIRECT = True 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
 
-# when 
+# Make sure when user login or input sensitive form, https is used; otherwise ban the request or login
+# see https://rickchristianson.wordpress.com/2013/10/31/getting-a-django-app-to-use-https-on-aws-elastic-beanstalk/
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Make sure you setup `SECURE_PROXY_SSL_HEADER` AND setup nginx or the web server in front of django before using this.
+# You will need to have nginx set the proxy header `X_FORWARDED_PROTO` to `https` when client request is indeed https.
+# If you don't configure nginx and django don't receive the header and perceive the request as insecure (http), as you turn `SECURE_SSL_REDIRECT` on, you will get an infinite loop: django will redirect all your request which makes another (https) request, and so on.
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True 
+
+# Django CORS header settings
 CORS_ORIGIN_WHITELIST = (
     'localhost:3000',
-    'appl-tracky-api-https.shaungc.com',
     'appl-tracky.api.shaungc.com',
     'rivernews.github.io'
 )
 
-# this sets the header to '*'. if frontend are sending credentials, you cannot use this.
+# This sets the header to '*'. if frontend are sending credentials, you cannot use this.
 # and needs to use CORS_ORIGIN_WHITELIST instead
 # CORS_ORIGIN_ALLOW_ALL = True 
 
-# this is necessary if frontend is sending auth credentials, otherwise browser will raise error:
+# This is necessary if frontend is sending auth credentials, otherwise browser will raise error:
 # "The value of the 'Access-Control-Allow-Credentials' header in the response is '' 
 # which must be 'true' when the request's credentials mode is 'include'."
 CORS_ALLOW_CREDENTIALS = True # this includes cookie and JWT auth tokens
@@ -128,6 +140,31 @@ DATABASES = {
         'OPTIONS': {
             'sslmode': 'require',
         }
+    }
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'mail_admins': {
+            'level': 'WARNING',
+            'class': 'django.utils.log.AdminEmailHandler',
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'WARNING',
+        },
     }
 }
 
