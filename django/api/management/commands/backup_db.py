@@ -22,7 +22,7 @@ class Command(BaseCommand):
             # https://stackoverflow.com/a/20480323/9814131
             # https://stackoverflow.com/a/7003567/9814131
             mail_admins(
-                subject='DB Backup Initiated',
+                subject='Starting DB Backup',
                 message=f'The DB Backup cron job is about to start, you should see the result within a few minutes.'
             )
 
