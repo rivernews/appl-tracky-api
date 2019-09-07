@@ -15,4 +15,5 @@ rest-social-auth < 2.1
 social-auth-core >=3.0, <4.0
 social-auth-app-django >=3.1, <4.0
 
-# Dev
+# For access to AWS S3
+boto3==1.9.27
