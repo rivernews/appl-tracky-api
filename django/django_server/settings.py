@@ -75,9 +75,9 @@ if not DEBUG:
 
 # Django CORS header settings
 CORS_ORIGIN_WHITELIST = tuple(filter(bool, [ # filter: https://stackoverflow.com/questions/3845423/remove-empty-strings-from-a-list-of-strings
-    'localhost:3000', # frontend react development server
-    os.environ.get('CORS_DOMAIN_WHITELIST') # frontend hosted on github page
-]))
+        'localhost:3000', # frontend react development server
+    ] + os.environ.get('CORS_DOMAIN_WHITELIST', '').split(',') # frontend hosted on github page
+))
 
 # This sets the header to '*'. if frontend are sending credentials, you cannot use this.
 # and needs to use CORS_ORIGIN_WHITELIST instead
