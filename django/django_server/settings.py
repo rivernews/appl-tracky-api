@@ -75,9 +75,8 @@ if not DEBUG:
 
 # Django CORS header settings
 CORS_ORIGIN_WHITELIST = (
-    'localhost:3000',
-    'appl-tracky.api.shaungc.com',
-    'rivernews.github.io'
+    'localhost:3000', # frontend react development server
+    'rivernews.github.io' # frontend hosted on github page
 )
 
 # This sets the header to '*'. if frontend are sending credentials, you cannot use this.
