@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 
 # django doc: https://docs.djangoproject.com/en/2.2/ref/settings/#allowed-hosts
 if not DEBUG:
-    ALLOWED_HOSTS = os.environ.get('DEPLOYED_DOMAIN', '').split(',')
+    ALLOWED_HOSTS = list(filter(bool, os.environ.get('DEPLOYED_DOMAIN', '').split(',')))
 else:
     ALLOWED_HOSTS = []
 
@@ -74,10 +74,10 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True 
 
 # Django CORS header settings
-CORS_ORIGIN_WHITELIST = (
+CORS_ORIGIN_WHITELIST = tuple(filter(bool, # filter: https://stackoverflow.com/questions/3845423/remove-empty-strings-from-a-list-of-strings
     'localhost:3000', # frontend react development server
-    'rivernews.github.io' # frontend hosted on github page
-)
+    os.environ.get('CORS_DOMAIN_WHITELIST') # frontend hosted on github page
+))
 
 # This sets the header to '*'. if frontend are sending credentials, you cannot use this.
 # and needs to use CORS_ORIGIN_WHITELIST instead
