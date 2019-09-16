@@ -248,7 +248,7 @@ REST_FRAMEWORK = {
 # JWT settings
 # http://getblimp.github.io/django-rest-framework-jwt/
 JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=300),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=1),
     'JWT_ALLOW_REFRESH': True,
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
