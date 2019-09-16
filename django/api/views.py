@@ -42,7 +42,7 @@ class ApiHomeView(TemplateView):
 
 
 class SocialAuthView(SocialJWTUserAuthView):
-      serializer_class = ApiSerializers.SocialAuthUserSerializer
+    serializer_class = ApiSerializers.SocialAuthUserSerializer
 
 
 """
