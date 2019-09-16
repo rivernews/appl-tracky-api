@@ -223,7 +223,7 @@ class ApplicationSerializer(BaseSerializer):
             'user', 
             'user_company', 'position_title', 
             'job_description_page', 'job_source', 
-            'labels') + BaseSerializer.Meta.fields
+            'labels', 'notes') + BaseSerializer.Meta.fields
     
 class PositionLocationSerializer(BaseSerializer):
 

@@ -168,6 +168,7 @@ class Application(ManagedBaseModel):
     job_source = models.OneToOneField('Link', related_name="job_source_application", on_delete=models.SET_NULL, null=True, blank=True, help_text="Specify where do you hear this position, e.g. Handshake, Linkedin, Glassdoor..., etc.")
 
     labels = models.ManyToManyField('Label', blank=True)
+    notes = models.TextField(blank=True, default='')
 
     def __str__(self):
         return self.position_title
