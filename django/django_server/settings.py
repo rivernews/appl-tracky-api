@@ -137,7 +137,7 @@ DATABASES = {
         'HOST': os.getenv('SQL_HOST', 'localhost'),
         'PORT': os.getenv('SQL_PORT', '5432'),
         'OPTIONS': {
-            'sslmode': 'require',
+            # 'sslmode': 'require', # using port-forwarding now for postgres in k8 (only within localhost so is safe)
         }
     }
 }
