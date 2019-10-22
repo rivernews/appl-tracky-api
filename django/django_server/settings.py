@@ -148,7 +148,7 @@ DATABASES = {
 CACHEOPS_REDIS = {
     'host': os.getenv('REDIS_HOST', 'localhost'), # redis-server is on same machine
     'port': os.getenv('REDIS_PORT', '6379'),        # default redis port
-    'db': 1,             # SELECT non-default redis database
+    'db': int(os.getenv('CACHEOPS_REDIS_DB', '1')),             # SELECT non-default redis database
                          # using separate redis db or redis instance
                          # is highly recommended
 
