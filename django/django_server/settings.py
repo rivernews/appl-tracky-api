@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     'rest_framework', 'corsheaders',
     'social_django', 'rest_social_auth', # django social auth + rest social auth
+    'cacheops',
 
     'api.apps.ApiConfig',
 ]
@@ -143,6 +144,22 @@ DATABASES = {
 }
 
 
+# https://github.com/Suor/django-cacheops
+CACHEOPS_REDIS = {
+    'host': os.getenv('REDIS_HOST', 'localhost'), # redis-server is on same machine
+    'port': os.getenv('REDIS_PORT', '6379'),        # default redis port
+    'db': 1,             # SELECT non-default redis database
+                         # using separate redis db or redis instance
+                         # is highly recommended
+
+    'socket_timeout': 5,   # connection timeout in seconds, optional
+}
+
+CACHEOPS = {
+    'api.*': {'ops': {'get', 'fetch'}, 'timeout': 60*60}
+}
+
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -218,7 +235,7 @@ REST_FRAMEWORK = {
 
     # Scalability - pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 15,
 
     # Security - throttling
     # https://www.django-rest-framework.org/api-guide/throttling/
@@ -228,7 +245,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_THROTTLE_RATES': {
         'anon': '20/min',
-        'user': '60/min'
+        'user': '180/min'
     },
     
     'DEFAULT_PERMISSION_CLASSES': (
