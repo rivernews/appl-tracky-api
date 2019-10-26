@@ -2,7 +2,11 @@
 
 [![CircleCI](https://circleci.com/gh/rivernews/appl-tracky-api.svg?style=shield)](https://circleci.com/gh/rivernews/appl-tracky-api)
 
-This is the backend repository for the web app, Appl Tracky, an Application Tracking System to help job finders ease their out-of-control spreadsheet use tracking every job application record. The frontend documentation for this app is in the [front end repo](https://github.com/rivernews/appl-tracky-spa).
+This is the backend repository for the web app, Appl Tracky, an Application Tracking System to help job finders ease their out-of-control spreadsheet use tracking every job application record. 
+
+**Frontend** The frontend documentation for this app is in the [front end repo](https://github.com/rivernews/appl-tracky-spa).
+
+**Infrastructure** of this project, is provisioned by the [Iriversland2 Kubernetes](https://github.com/rivernews/iriversland2-kubernetes) repository.
 
 You can also take a look at the dev diary (but they are pretty messy), quick notes and roadmaps in [doc for dev](docs).
 
