@@ -39,7 +39,7 @@ class ManagedBaseModel(models.Model):
     
     class Meta:
         abstract = True
-        ordering = ['created_at']
+        ordering = ('-modified_at', '-created_at')
 
 class Address(ManagedBaseModel):
     place_name = models.CharField(blank=True, max_length=50)
