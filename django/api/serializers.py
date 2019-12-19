@@ -174,6 +174,9 @@ class CompanySerializer(BaseSerializer):
     hq_location = AddressSerializer(many=False)
     home_page = LinkSerializer(many=False)
 
+    # embedding field of objects that are not in company's table (no foreign key field in company, the application table has foreign key to reference company)
+    applications = serializers.SerializerMethodField()
+
     one_to_one_fields = {
         'hq_location': models.Address,
         'home_page': models.Link,
@@ -181,7 +184,10 @@ class CompanySerializer(BaseSerializer):
 
     class Meta:
         model = models.Company
-        fields = ('user', 'labels', 'name', 'hq_location', 'home_page') + BaseSerializer.Meta.fields
+        fields = ('user', 'labels', 'name', 'hq_location', 'home_page', 'applications') + BaseSerializer.Meta.fields
+    
+    def get_applications(self, company):
+        return ApplicationSerializer(company.application_set.all(), many=True, context=self.context).data
     
 class CompanyRatingSerializer(BaseSerializer):
 
