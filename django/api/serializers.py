@@ -218,6 +218,8 @@ class ApplicationSerializer(BaseSerializer):
     job_description_page = LinkSerializer(many=False) # onetoone
     job_source = LinkSerializer(many=False) # onetoone
 
+    statuses = serializers.SerializerMethodField()
+
     one_to_one_fields = {
         'job_description_page': models.Link,
         'job_source': models.Link,
@@ -229,7 +231,11 @@ class ApplicationSerializer(BaseSerializer):
             'user', 
             'user_company', 'position_title', 
             'job_description_page', 'job_source', 
-            'labels', 'notes') + BaseSerializer.Meta.fields
+            'labels', 'notes',
+            'statuses') + BaseSerializer.Meta.fields
+    
+    def get_statuses(self, application):
+        return ApplicationStatusSerializer(application.applicationstatus_set.all(), many=True, context=self.context).data
     
 class PositionLocationSerializer(BaseSerializer):
 
@@ -251,7 +257,7 @@ class ApplicationStatusLinkListSerializer(serializers.ListSerializer):
     def update(self, instance, validated_data, **kwargs):
         """
             This ListSerializer is an instruction of when given a list of application status link instances,
-            how we should call `ApplicationStatusLinkSerializer(...)`.
+            how we should call `applicationstatuslink_seterializer(...)`.
 
             We do best effort when dealing with update of multiple instances(=objects):
             If the object is not in our database - we interpret this as a create request
@@ -306,7 +312,7 @@ class ApplicationStatusLinkSerializer(BaseSerializer):
         model = models.ApplicationStatusLink
         fields = ('application_status', 'link', 'user') + BaseSerializer.Meta.fields
 
-        # when using `many=True` on ApplicationStatusLinkSerializer(many=True), will use the following class for deserialize
+        # when using `many=True` on applicationstatuslink_seterializer(many=True), will use the following class for deserialize
         list_serializer_class = ApplicationStatusLinkListSerializer
 
 
