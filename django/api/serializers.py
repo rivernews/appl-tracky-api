@@ -164,6 +164,13 @@ class LinkSerializer(BaseSerializer):
         model = models.Link
         fields = ('text', 'user', 'url', 'order') + BaseSerializer.Meta.fields
 
+
+class LabelSerializer(BaseSerializer):
+    class Meta:
+        model = models.Label
+        fields = ('user', 'text', 'color', 'order') + BaseSerializer.Meta.fields
+
+
 class CompanySerializer(BaseSerializer):
     # setup user upon creation, see https://stackoverflow.com/questions/32509815/django-rest-framework-get-data-from-foreign-key-relation
     user = serializers.PrimaryKeyRelatedField(
@@ -176,6 +183,7 @@ class CompanySerializer(BaseSerializer):
 
     # embedding field of objects that are not in company's table (no foreign key field in company, the application table has foreign key to reference company)
     applications = serializers.SerializerMethodField()
+    labels = LabelSerializer(many=True, read_only=True, required=False)
 
     one_to_one_fields = {
         'hq_location': models.Address,
@@ -184,7 +192,7 @@ class CompanySerializer(BaseSerializer):
 
     class Meta:
         model = models.Company
-        fields = ('user', 'labels', 'name', 'hq_location', 'home_page', 'applications') + BaseSerializer.Meta.fields
+        fields = ('user', 'labels', 'name', 'hq_location', 'home_page', 'applications', 'labels') + BaseSerializer.Meta.fields
     
     def get_applications(self, company):
         return ApplicationSerializer(company.application_set.all(), many=True, context=self.context).data
@@ -203,10 +211,6 @@ class CompanyRatingSerializer(BaseSerializer):
         model = models.CompanyRating
         fields = ('source', 'value', 'company', 'sample_date') + BaseSerializer.Meta.fields
 
-class LabelSerializer(BaseSerializer):
-    class Meta:
-        model = models.Label
-        fields = ('user', 'text', 'color', 'order') + BaseSerializer.Meta.fields
 
 class ApplicationSerializer(BaseSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True) # foreign jey
