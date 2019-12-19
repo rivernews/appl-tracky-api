@@ -15,6 +15,8 @@ from . import permissions as ApiPermissions
 
 from . import utils as ApiUtils
 
+from . import filters as ApiFilters
+
 # for health check combining with db migration check
 # https://engineering.instawork.com/elegant-database-migrations-on-ecs-74f3487da99f
 from django.db import DEFAULT_DB_ALIAS, connections
@@ -117,6 +119,7 @@ class CompanyViewSet(BaseModelViewSet):
     model = models.Company
     queryset = models.Company.objects.none()
     serializer_class = ApiSerializers.CompanySerializer
+    filter_class = ApiFilters.CompanyFilter
 
     # def create(self, request):
     #     """

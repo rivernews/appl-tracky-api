@@ -2,11 +2,14 @@ django >= 1.0,<2.0
 # psycopg2 >= 2.0,<3.0
 psycopg2-binary >= 2.0,<3.0
 gunicorn == 19.9.0
-awscli
+awscli==1.16.230
 
 djangorestframework>=3.9.1
 django-cors-headers==2.4.0
 djangorestframework-jwt >= 1.11,<1.12
+
+django-filter==2.2.0
+djangorestframework-filters>=1.0.0.dev0
 
 rest-social-auth < 2.1
 

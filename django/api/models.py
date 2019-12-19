@@ -69,7 +69,7 @@ class Link(ManagedBaseModel):
         ordering = ['-order', 'text', 'url']
 
 class Label(ManagedBaseModel):
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True) # null to determine if it's pre-populated label or user input label
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, blank=True) # null to determine if it's pre-populated label or user input label
     text = models.CharField(blank=False, max_length=200)
     color = models.CharField(blank=True, max_length=20)
     order = models.IntegerField(null=False, blank=True, default=0)

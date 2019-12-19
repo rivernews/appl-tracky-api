@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework', 'corsheaders',
-    'django_filters',
+    'django_filters', 'rest_framework_filters',
     'social_django', 'rest_social_auth', # django social auth + rest social auth
     'cacheops',
 
@@ -240,9 +240,13 @@ REST_FRAMEWORK = {
 
     # Filtering
     # drf: https://www.django-rest-framework.org/api-guide/filtering/#djangofilterbackend
-    # django-filter: https://django-filter.readthedocs.io/en/master/guide/rest_framework.html
     'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
+        # Django-filter: https://django-filter.readthedocs.io/en/master/guide/rest_framework.html
+        # 'django_filters.rest_framework.DjangoFilterBackend',
+
+        # Django REST filter: https://github.com/philipn/django-rest-framework-filters#installation
+        # 'rest_framework_filters.backends.RestFrameworkFilterBackend',
+        'api.filters.OwnershipFilterBackend',
     ),
 
     # Security - throttling
