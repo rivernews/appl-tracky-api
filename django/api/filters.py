@@ -2,7 +2,21 @@ from . import models
 import rest_framework_filters as filters
 import rest_framework_filters.backends as filter_backends
 from rest_framework import serializers
+
+from django.core.exceptions import FieldDoesNotExist
 from django.db.models import Q
+
+def generic_ownership_filter_queryset(request, queryset):
+    try:
+        if not request.user.is_superuser and queryset.model._meta.get_field('user'):
+            return queryset.filter(
+                Q(user__isnull=True) |
+                Q(user__isnull=False) & Q(user=request.user)
+            )
+    except FieldDoesNotExist:
+        pass
+    
+    return queryset
 
 
 class LabelFilter(filters.FilterSet):
@@ -10,13 +24,11 @@ class LabelFilter(filters.FilterSet):
         model = models.Label
         fields = {'text': ['exact']}
 
+
 def company_label_filter_get_queryset(request):
-    if request.user.is_superuser:
-        return models.Label.objects.all()
-    
-    return models.Label.objects.filter(
-        Q(user__isnull=True) |
-        Q(user__isnull=False) & Q(user=request.user)
+    return generic_ownership_filter_queryset(
+        request,
+        models.Label.objects.all()
     )
 
 
@@ -35,10 +47,5 @@ class OwnershipFilterBackend(filter_backends.RestFrameworkFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         queryset = super().filter_queryset(request, queryset, view)
-        if request.user.is_superuser:
-            return queryset
-        
-        return queryset.filter(
-            Q(user__isnull=True) |
-            Q(user__isnull=False) & Q(user=request.user)
-        )
+
+        return generic_ownership_filter_queryset(request, queryset)
