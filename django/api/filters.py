@@ -40,6 +40,7 @@ class LabelFilter(filters.FilterSet):
 def company_label_filter_get_queryset(request):
     return models.Label.objects.all()
 
+
 class CompanyFilter(filters.FilterSet):
     labels = filters.RelatedFilter(LabelFilter, field_name='labels', queryset=company_label_filter_get_queryset)
 
