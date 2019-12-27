@@ -154,19 +154,30 @@ class CompanyViewSet(BaseModelViewSet):
         """
             1. Serializer commit data change, i.e. serializer.save() --> serializer.update()
         """
-
+        patch = self.label_patcher()
+        if patch:
+            serializer.save(**patch)
+        else:
+            super().perform_update(serializer)
+    
+    def perform_create(self, serializer):
+        patch = self.label_patcher()
+        serializer.save(**patch)
+    
+    def label_patcher(self):
         # Deal with labels - currently only support:
         # 1. one label at most for a company
         # 2. public label, i.e., labels w/o user
-        if (self.request.data.get('labels')) and \
-            len(self.request.data['labels']) == 1:
-            label = self.request.data['labels'][0]
-            labelInstance = models.Label.objects.get(user__isnull=True, text=label['text'])
-            
-            serializer.save(labels=[labelInstance])
-            return
-
-        super().perform_update(serializer)
+        labelInstance = self.get_label_instance()
+        if labelInstance:
+            return {
+                'labels': [labelInstance]
+            }
+        
+        return {}
+    
+    def get_label_instance(self):
+        return models.Label.objects.get(user__isnull=True, text=self.request.data['labels'][0]['text']) if (self.request.data.get('labels')) and len(self.request.data['labels']) == 1 else None
         
 
 class CompanyRatingViewSet(BaseModelViewSet):
