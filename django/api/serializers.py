@@ -9,6 +9,12 @@ from rest_social_auth.serializers import UserJWTSerializer
 
 from . import utils as ApiUtils
 
+"""
+    Django REST Serializer
+    https://www.django-rest-framework.org/api-guide/serializers/
+"""
+
+
 class BaseSerializer(serializers.HyperlinkedModelSerializer):
     # UUIDField has no allow_blank arg and always enfource a non-blank value, which makes it hard to deal with one-to-many create/update
     # we are using `SlugField` to allow writable related fields, where blank uuid may indicate a `create` request and otherwise `update`.
@@ -164,6 +170,13 @@ class LinkSerializer(BaseSerializer):
         model = models.Link
         fields = ('text', 'user', 'url', 'order') + BaseSerializer.Meta.fields
 
+
+class LabelSerializer(BaseSerializer):
+    class Meta:
+        model = models.Label
+        fields = ('user', 'text', 'color', 'order') + BaseSerializer.Meta.fields
+
+
 class CompanySerializer(BaseSerializer):
     # setup user upon creation, see https://stackoverflow.com/questions/32509815/django-rest-framework-get-data-from-foreign-key-relation
     user = serializers.PrimaryKeyRelatedField(
@@ -174,6 +187,10 @@ class CompanySerializer(BaseSerializer):
     hq_location = AddressSerializer(many=False)
     home_page = LinkSerializer(many=False)
 
+    # embedding field of objects that are not in company's table (no foreign key field in company, the application table has foreign key to reference company)
+    applications = serializers.SerializerMethodField()
+    labels = LabelSerializer(many=True, read_only=False, required=False)
+
     one_to_one_fields = {
         'hq_location': models.Address,
         'home_page': models.Link,
@@ -181,8 +198,21 @@ class CompanySerializer(BaseSerializer):
 
     class Meta:
         model = models.Company
-        fields = ('user', 'labels', 'name', 'hq_location', 'home_page') + BaseSerializer.Meta.fields
+        fields = ('user', 'labels', 'name', 'hq_location', 'home_page', 'applications', 'labels') + BaseSerializer.Meta.fields
     
+    def get_applications(self, company):
+        return ApplicationSerializer(company.application_set.all(), many=True, context=self.context).data
+    
+    def validate(self, data):
+        return super().validate(data)
+    
+    def validate_labels(self, *args, **kwargs):
+        pass
+    
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
+    
+
 class CompanyRatingSerializer(BaseSerializer):
 
     source = LinkSerializer(many=False)
@@ -197,10 +227,6 @@ class CompanyRatingSerializer(BaseSerializer):
         model = models.CompanyRating
         fields = ('source', 'value', 'company', 'sample_date') + BaseSerializer.Meta.fields
 
-class LabelSerializer(BaseSerializer):
-    class Meta:
-        model = models.Label
-        fields = ('user', 'text', 'color', 'order') + BaseSerializer.Meta.fields
 
 class ApplicationSerializer(BaseSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True) # foreign jey
@@ -211,6 +237,8 @@ class ApplicationSerializer(BaseSerializer):
 
     job_description_page = LinkSerializer(many=False) # onetoone
     job_source = LinkSerializer(many=False) # onetoone
+
+    statuses = serializers.SerializerMethodField()
 
     one_to_one_fields = {
         'job_description_page': models.Link,
@@ -223,7 +251,11 @@ class ApplicationSerializer(BaseSerializer):
             'user', 
             'user_company', 'position_title', 
             'job_description_page', 'job_source', 
-            'labels', 'notes') + BaseSerializer.Meta.fields
+            'labels', 'notes',
+            'statuses') + BaseSerializer.Meta.fields
+    
+    def get_statuses(self, application):
+        return ApplicationStatusSerializer(application.applicationstatus_set.all(), many=True, context=self.context).data
     
 class PositionLocationSerializer(BaseSerializer):
 

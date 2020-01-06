@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework', 'corsheaders',
+    'django_filters', 'rest_framework_filters',
     'social_django', 'rest_social_auth', # django social auth + rest social auth
     'cacheops',
 
@@ -235,7 +236,18 @@ REST_FRAMEWORK = {
 
     # Scalability - pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 16,
+    'PAGE_SIZE': 8,
+
+    # Filtering
+    # drf: https://www.django-rest-framework.org/api-guide/filtering/#djangofilterbackend
+    'DEFAULT_FILTER_BACKENDS': (
+        # Django-filter: https://django-filter.readthedocs.io/en/master/guide/rest_framework.html
+        # 'django_filters.rest_framework.DjangoFilterBackend',
+
+        # Django REST filter: https://github.com/philipn/django-rest-framework-filters#installation
+        # 'rest_framework_filters.backends.RestFrameworkFilterBackend',
+        'api.filters.OwnershipFilterBackend',
+    ),
 
     # Security - throttling
     # https://www.django-rest-framework.org/api-guide/throttling/
