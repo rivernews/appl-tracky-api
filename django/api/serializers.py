@@ -277,7 +277,7 @@ class ApplicationStatusLinkListSerializer(serializers.ListSerializer):
     def update(self, instance, validated_data, **kwargs):
         """
             This ListSerializer is an instruction of when given a list of application status link instances,
-            how we should call `applicationstatuslink_seterializer(...)`.
+            how we should call `ApplicationStatusLinkSerializer(...)`.
 
             We do best effort when dealing with update of multiple instances(=objects):
             If the object is not in our database - we interpret this as a create request
@@ -332,7 +332,7 @@ class ApplicationStatusLinkSerializer(BaseSerializer):
         model = models.ApplicationStatusLink
         fields = ('application_status', 'link', 'user') + BaseSerializer.Meta.fields
 
-        # when using `many=True` on applicationstatuslink_seterializer(many=True), will use the following class for deserialize
+        # when using `many=True` on ApplicationStatusLinkSerializer(many=True), will use the following class for deserialize
         list_serializer_class = ApplicationStatusLinkListSerializer
 
 
