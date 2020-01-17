@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'cacheops',
 
     'api.apps.ApiConfig',
+    'search.apps.SearchConfig',
 ]
 
 # django doc: https://docs.djangoproject.com/en/2.2/ref/settings/#allowed-hosts
