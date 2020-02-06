@@ -33,36 +33,28 @@ jobs:
             docker tag $IMAGE_NAME:latest $IMAGE_NAME:$CIRCLE_SHA1
             docker push $IMAGE_NAME:latest
             docker push $IMAGE_NAME:$CIRCLE_SHA1
-  
-  # deploy:
-  #   docker:
-  #     # https://hub.docker.com/r/hashicorp/terraform/tags
-  #     - image: shaungc/terraform-kubectl-image
-  #   environment:
-  #     <<: *base_environment
-  #     TF_REMOTE_GIT_REPO: https://github.com/rivernews/terraform-provisioning.git
-  #   working_directory: /terraform # set default directory to cloned github repo directory
-  #   steps:
-  #     - run:
-  #         name: Initialize Terraform
-  #         command: |
-  #           ls -l
-  #           chmod +x init-backend-cicd.sh
-  #           sh ./init-backend-cicd.sh
-  #           echo 'export TF_VAR_app_container_image_tag="${CIRCLE_SHA1}"' >> $BASH_ENV # not working!
-  #           env
-  #     - run:
-  #         name: Plan Terraform
-  #         command: |
-  #           source $BASH_ENV # this is necessary when using env var you set during `run:`
-  #           terraform plan
-  #           env
-  #     - run:
-  #         name: Apply Terraform
-  #         command: |
-  #           source $BASH_ENV # this is necessary when using env var you set during `run:`
-  #           terraform apply -auto-approve
-  
+  report_build:
+    docker:
+      - image: circleci/buildpack-deps:curl
+    steps:
+      - slack/status:
+          mentions: 'here,'
+          success_message: "*Build success - Appl Tracky API*\nAppl Tracky API build is ready.\nHash: ${CIRCLE_SHA1}"
+  deploy:
+    docker:
+      - image: shaungc/terraform-kubectl-image
+    environment:
+      <<: *base_environment
+    working_directory: ~/repo/cicd
+    steps:
+      - checkout:
+          path: ~/repo
+      - run:
+          name: Run Terraform
+          command: |
+            ls -l
+            chmod +x run-terraform.sh
+            . ./run-terraform.sh
   report:
     docker:
       - image: circleci/buildpack-deps:curl
@@ -71,21 +63,23 @@ jobs:
     steps:
       - slack/status:
           mentions: 'here,'
-          success_message: "*Published - Appl Tracky*\nAppl Tracky is ready to be accessed (http://${DEPLOYED_DOMAIN_NAME}).\nHash: ${CIRCLE_SHA1}\nHashed url (http://${CIRCLE_SHA1}.${DEPLOYED_DOMAIN_NAME}).\nDjango health check (http://${CIRCLE_SHA1}.${DEPLOYED_DOMAIN_NAME}/django-health-check/).\nDjango fail test (http://${CIRCLE_SHA1}.${DEPLOYED_DOMAIN_NAME}/fail-test/).\nDjango admin portal (http://${CIRCLE_SHA1}.${DEPLOYED_DOMAIN_NAME}/admin/)."
+          success_message: "*Published - Appl Tracky*\nAppl Tracky is ready to be accessed (https://${DEPLOYED_DOMAIN_NAME}).\nHash: ${CIRCLE_SHA1}\nDjango health check (https://${DEPLOYED_DOMAIN_NAME}/django-health-check/).\nDjango fail test (https://${DEPLOYED_DOMAIN_NAME}/fail-test/).\nDjango admin portal (https://${DEPLOYED_DOMAIN_NAME}/admin/)."
 
 
 # circleci doc: https://circleci.com/docs/2.0/workflows/#fan-outfan-in-workflow-example
 workflows:
-  # version: 2
   build-master:
     jobs:
       - build:
           filters:
             branches:
               only: master
-      # - deploy:
-      #     requires:
-      #       - build
-      - report:
+      - report_build:
           requires:
             - build
+      - deploy:
+          requires:
+            - report_build
+      - report:
+          requires:
+            - deploy
