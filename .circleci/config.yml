@@ -63,7 +63,7 @@ jobs:
     steps:
       - slack/status:
           mentions: 'here,'
-          success_message: "*Published - Appl Tracky*\nAppl Tracky is ready to be accessed (https://${DEPLOYED_DOMAIN_NAME}).\nHash: ${CIRCLE_SHA1}\nDjango health check (https://${DEPLOYED_DOMAIN_NAME}/django-health-check/).\nDjango fail test (https://${DEPLOYED_DOMAIN_NAME}/fail-test/).\nDjango admin portal (https://${DEPLOYED_DOMAIN_NAME}/admin/)."
+          success_message: "*Published - Appl Tracky*\nAppl Tracky is ready to be accessed (https://${DEPLOYED_DOMAIN_NAME}).\nDjango admin portal (https://${DEPLOYED_DOMAIN_NAME}/admin/)."
 
 
 # circleci doc: https://circleci.com/docs/2.0/workflows/#fan-outfan-in-workflow-example
