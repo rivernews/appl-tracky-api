@@ -9,6 +9,12 @@ from rest_social_auth.serializers import UserJWTSerializer
 
 from . import utils as ApiUtils
 
+"""
+    Django REST Serializer
+    https://www.django-rest-framework.org/api-guide/serializers/
+"""
+
+
 class BaseSerializer(serializers.HyperlinkedModelSerializer):
     # UUIDField has no allow_blank arg and always enfource a non-blank value, which makes it hard to deal with one-to-many create/update
     # we are using `SlugField` to allow writable related fields, where blank uuid may indicate a `create` request and otherwise `update`.
@@ -183,7 +189,7 @@ class CompanySerializer(BaseSerializer):
 
     # embedding field of objects that are not in company's table (no foreign key field in company, the application table has foreign key to reference company)
     applications = serializers.SerializerMethodField()
-    labels = LabelSerializer(many=True, read_only=True, required=False)
+    labels = LabelSerializer(many=True, read_only=False, required=False)
 
     one_to_one_fields = {
         'hq_location': models.Address,
@@ -197,6 +203,16 @@ class CompanySerializer(BaseSerializer):
     def get_applications(self, company):
         return ApplicationSerializer(company.application_set.all(), many=True, context=self.context).data
     
+    def validate(self, data):
+        return super().validate(data)
+    
+    def validate_labels(self, *args, **kwargs):
+        pass
+    
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
+    
+
 class CompanyRatingSerializer(BaseSerializer):
 
     source = LinkSerializer(many=False)
@@ -261,7 +277,7 @@ class ApplicationStatusLinkListSerializer(serializers.ListSerializer):
     def update(self, instance, validated_data, **kwargs):
         """
             This ListSerializer is an instruction of when given a list of application status link instances,
-            how we should call `applicationstatuslink_seterializer(...)`.
+            how we should call `ApplicationStatusLinkSerializer(...)`.
 
             We do best effort when dealing with update of multiple instances(=objects):
             If the object is not in our database - we interpret this as a create request
@@ -316,7 +332,7 @@ class ApplicationStatusLinkSerializer(BaseSerializer):
         model = models.ApplicationStatusLink
         fields = ('application_status', 'link', 'user') + BaseSerializer.Meta.fields
 
-        # when using `many=True` on applicationstatuslink_seterializer(many=True), will use the following class for deserialize
+        # when using `many=True` on ApplicationStatusLinkSerializer(many=True), will use the following class for deserialize
         list_serializer_class = ApplicationStatusLinkListSerializer
 
 

@@ -46,7 +46,7 @@ class CompanyFilter(filters.FilterSet):
 
     class Meta:
         model = models.Company
-        fields = {}
+        fields = {'labels': ['isnull']}
 
 
 class OwnershipFilterBackend(filter_backends.RestFrameworkFilterBackend):

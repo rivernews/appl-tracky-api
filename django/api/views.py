@@ -121,20 +121,64 @@ class CompanyViewSet(BaseModelViewSet):
     serializer_class = ApiSerializers.CompanySerializer
     filter_class = ApiFilters.CompanyFilter
 
-    # def create(self, request):
-    #     """
-    #         Entry point for POST request.
-    #         CompanyViewSet.create() => 
-    #         .is_valid() based on serializer's fields => 
-    #         CompanyViewSet.perform_create() =>
-    #         CompanySerializer.create()
-    #     """
-    #     # you can inspect serializer and .is_valid() here
-    #     serializer = self.serializer_class(data=request.data)
-    #     print("Is valid?", serializer.is_valid())
-    #     import ipdb; ipdb.set_trace()
-    #     return super(CompanyViewSet, self).create(request)
+    def create(self, request):
+        return super().create(request)
 
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Serving a PATCH request
+        Q: how is update() different from partial_update()?
+        A: https://stackoverflow.com/questions/41110742/django-rest-framework-partial-update
+
+        Source code: rest_framework.mixins.UpdateModelMixin
+        Additional resources: https://stackoverflow.com/a/37050246/9814131
+        """
+
+        """
+            1. Sets partial=True
+            2. Call viewset.update()
+        """
+
+        return super().partial_update(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        """
+            1. Load data into serializer --> permission check
+            2. Validate data in serializer --> serializer.validate()
+            3. Perform update --> viewset.perform_update()
+        """
+
+        return super().update(request, *args, **kwargs)
+    
+    def perform_update(self, serializer) -> None:
+        """
+            1. Serializer commit data change, i.e. serializer.save() --> serializer.update()
+        """
+        patch = self.label_patcher()
+        if patch:
+            serializer.save(**patch)
+        else:
+            super().perform_update(serializer)
+    
+    def perform_create(self, serializer):
+        patch = self.label_patcher()
+        serializer.save(**patch)
+    
+    def label_patcher(self):
+        # Deal with labels - currently only support:
+        # 1. one label at most for a company
+        # 2. public label, i.e., labels w/o user
+        labelInstance = self.get_label_instance()
+        if labelInstance:
+            return {
+                'labels': [labelInstance]
+            }
+        
+        return {}
+    
+    def get_label_instance(self):
+        return models.Label.objects.get(user__isnull=True, text=self.request.data['labels'][0]['text']) if (self.request.data.get('labels')) and len(self.request.data['labels']) == 1 else None
+        
 
 class CompanyRatingViewSet(BaseModelViewSet):
     model = models.CompanyRating
