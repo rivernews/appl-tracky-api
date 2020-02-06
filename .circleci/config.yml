@@ -39,7 +39,7 @@ jobs:
     steps:
       - slack/status:
           mentions: 'here,'
-          success_message: "*Build success - Appl Tracky API*\Appl Tracky API build is ready.\nHash: ${CIRCLE_SHA1}"
+          success_message: "*Build success - Appl Tracky API*\nAppl Tracky API build is ready.\nHash: ${CIRCLE_SHA1}"
   deploy:
     docker:
       - image: shaungc/terraform-kubectl-image
