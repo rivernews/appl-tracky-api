@@ -6,7 +6,7 @@ variable "app_container_image_tag" {}
 
 module "appl_tracky_api" {
   source  = "rivernews/kubernetes-microservice/digitalocean"
-  version = "v0.1.1"
+  version = "v0.1.18"
 
   aws_region     = var.aws_region
   aws_access_key = var.aws_access_key
@@ -39,6 +39,7 @@ module "appl_tracky_api" {
 
     "/database/redis_cluster_kubernetes/REDIS_HOST",
     "/database/redis_cluster_kubernetes/REDIS_PORT",
+    "/database/redis_cluster_kubernetes/REDIS_PASSWORD",
     "/app/appl-tracky/CACHEOPS_REDIS_DB",
 
     "/service/gmail/EMAIL_HOST",
