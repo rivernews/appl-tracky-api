@@ -29,6 +29,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
     }, ...]
     """
     one_to_one_fields = {}
+    many_to_many_fields = {}
 
     def create(self, validated_data):
         """
@@ -48,6 +49,9 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         # create relational objects
         one_to_one_fields_data = self.create_one_to_one_fields(validated_data)
 
+        # link many to many field relational objects
+        many_to_many_fields_data = self.create_or_get_many_to_many_fields(validated_data)
+
         # remove uuid to avoid writing to uuid field
         # if 'uuid' in validated_data:
         #     del validated_data['uuid']
@@ -58,7 +62,20 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         # create main model obj
         new_model_object = ApiUtils.create_instance(self.Meta.model, {
             **validated_data, **one_to_one_fields_data
-        })
+        }, excluded_fields=self.many_to_many_fields)
+
+        # many to many fields have to be handled separately when create() for parent object
+        # (main model obj), because many-to-many field can only be assigned after parent 
+        # object got created in db and has a pk.
+        #
+        # many to many fields are assigned by `.add()` method and it writes to db,
+        # so no need to call `save()` after add.
+        # https://stackoverflow.com/a/10366094/9814131
+        for many_to_many_field_name, many_to_many_field_object_list in many_to_many_fields_data.items():
+            many_to_many_field = getattr(new_model_object, many_to_many_field_name)
+            for many_to_many_field_object in many_to_many_field_object_list:
+                many_to_many_field.add(many_to_many_field_object.pk)
+
         return new_model_object
     
     def update(self, instance, validated_data):
@@ -76,7 +93,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         self.inject_user_info_data(self.Meta.model, validated_data)
 
         # update subject model instance
-        ApiUtils.update_instance(instance, validated_data, self.one_to_one_fields)
+        ApiUtils.update_instance(instance, validated_data, excluded_fields=self.one_to_one_fields)
 
         return instance
     
@@ -95,7 +112,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
                 if one_to_one_field_instance:
                     # after we update, we don't need to update subject instance since it references to that one to one model
                     ApiUtils.update_instance(one_to_one_field_instance, one_to_one_data)
-
+    
     def create_one_to_one_fields(self, validated_data):
         one_to_one_fields = {}
         for field_name, instance_model in self.one_to_one_fields.items():
@@ -114,14 +131,53 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
             
         return one_to_one_fields
     
+    def create_or_get_many_to_many_fields(self, validated_data, create=False):
+        """Method to return data of many to many fields.
+            Currently just used for `labels` many-to-many fields, which is a fixed collection
+            and does not need to create any new label in db. So this function will just pull out
+            existing label objects.
+            However, if in the future it's desired to create many-to-many objects first, this
+            function can be extended.
+        """
+
+        if create:
+            raise NotImplementedError('create_or_get_many_to_many_fields() not yet implemented for auto creating many-to-many field objects')
+        
+        many_to_many_fields_data = {}
+        for field_name, model in self.many_to_many_fields.items():
+            many_to_many_fields_data[field_name] = []
+
+            many_to_many_field_object_list = validated_data.pop(field_name)
+            
+            if create:
+                # many to many field object(s) not yet in db
+                for many_to_many_field_object_data in many_to_many_field_object_list:
+                    # TODO: create many to many object in db using 
+                    # `many_to_many_field_object` supplied from frontend;
+                    # use `ApiUtils.create_instance` to make sure all embedded relational fields are covered
+                    many_to_many_field_instance = many_to_many_field_object_data
+                    
+                    # include user info if necessary (when current user creating the 
+                    # many to many field object)
+                    self.inject_user_info_data(model, many_to_many_field_instance)
+
+                    many_to_many_fields_data[field_name].append(many_to_many_field_instance)
+            else:
+                # many to many field object(s) already exists in db
+                # the serializer should already pull out instances from db for `many_to_many_field_object_list`
+                # so just put them in returned dict
+                many_to_many_fields_data[field_name] = many_to_many_field_object_list
+        
+        return many_to_many_fields_data
+    
     def inject_user_info_data(self, model, one_to_one_data):
         if ApiUtils.is_model_field_exist(model, 'user'):
-                request = self.context.get('request', None)
-                if request:
-                    if request.user.is_authenticated:
-                        one_to_one_data['user'] = request.user
-                    else:
-                        raise FieldError('One to one field object requires a user field, but user is not authenticated. Please make sure you login.')
+            request = self.context.get('request', None)
+            if request:
+                if request.user.is_authenticated:
+                    one_to_one_data['user'] = request.user
+                else:
+                    raise FieldError('One to one field object requires a user field, but user is not authenticated. Please make sure you login.')
     
     class Meta:
         model = None
@@ -194,6 +250,10 @@ class CompanySerializer(BaseSerializer):
     one_to_one_fields = {
         'hq_location': models.Address,
         'home_page': models.Link,
+    }
+
+    many_to_many_fields = {
+        'labels': models.Label
     }
 
     class Meta:
