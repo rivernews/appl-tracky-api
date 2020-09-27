@@ -77,7 +77,7 @@ class Label(ManagedBaseModel):
     # you can use label.company_set or label.application_set to do reverse lookup
 
     def __str__(self):
-        return self.text
+        return f'{self.text} - {self.pk}'
 
     class Meta(ManagedBaseModel.Meta):
         ordering = ['-order', 'text']

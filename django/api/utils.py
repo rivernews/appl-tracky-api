@@ -29,7 +29,7 @@ def create_instance(model, fields_data: dict, excluded_fields={}) -> None:
 
             # if have no meaningful data, then skip it and don't even pass in into .objects.create()
             if fields_data[valid_field_name] != None and fields_data[valid_field_name] != '':
-                create_instance_kwargs[valid_field_name] = fields_data[valid_field_name]
+                create_instance_kwargs[valid_field_name] = fields_data.get(valid_field_name)
     
     instance = model.objects.create(**create_instance_kwargs)
     instance.save()
