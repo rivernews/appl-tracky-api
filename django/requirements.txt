@@ -2,7 +2,6 @@ django >= 1.0,<2.0
 # psycopg2 >= 2.0,<3.0
 psycopg2-binary >= 2.0,<3.0
 gunicorn == 19.9.0
-awscli==1.16.230
 
 djangorestframework>=3.9.1
 django-cors-headers==2.4.0
@@ -20,6 +19,6 @@ social-auth-core >=3.0, <4.0
 social-auth-app-django >=3.1, <4.0
 
 # For access to AWS S3
-boto3==1.9.27
+boto3==1.11.5
 
 elasticsearch-dsl==7.1.0
