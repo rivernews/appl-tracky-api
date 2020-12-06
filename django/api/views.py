@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from . import models
 from rest_framework import viewsets
+from rest_framework.response import Response
 from rest_social_auth.views import SocialJWTUserAuthView
 from . import serializers as ApiSerializers
 
@@ -123,6 +124,9 @@ class CompanyViewSet(BaseModelViewSet):
 
     def create(self, request):
         return super().create(request)
+    
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         """
@@ -138,6 +142,33 @@ class CompanyViewSet(BaseModelViewSet):
             1. Sets partial=True
             2. Call viewset.update()
         """
+        
+        # detect if it's a batch update or not
+        if isinstance(request.data, list):
+            # get all instances (db objects) so we can use them to update db
+            uuids_to_patch = []
+            for partial_company in request.data:
+                if not partial_company.get('uuid'):
+                    raise Exception('CompanyPathError: PATCH requires at least uuid in the object. Request data is ' + str(request.data)[:1000] + '...')
+                uuids_to_patch.append(partial_company['uuid'])
+            
+            db_instances = self.get_queryset().filter(uuid__in=uuids_to_patch)
+
+            # create serializer while using partial=True
+            list_serializer = ApiSerializers.CompanySerializer(
+                db_instances,
+                data=self.request.data,
+                many=True,
+                partial=True,
+                context={'request': self.request}
+            )
+
+            # validate it 
+            list_serializer.is_valid(raise_exception=True)
+
+            # pass over to update processes
+            self.perform_update(list_serializer)
+            return Response(list_serializer.data)
 
         return super().partial_update(request, *args, **kwargs)
     
@@ -154,31 +185,13 @@ class CompanyViewSet(BaseModelViewSet):
         """
             1. Serializer commit data change, i.e. serializer.save() --> serializer.update()
         """
-        patch = self.label_patcher()
-        if patch:
-            serializer.save(**patch)
-        else:
-            super().perform_update(serializer)
+
+        super().perform_update(serializer)
     
     def perform_create(self, serializer):
-        patch = self.label_patcher()
-        serializer.save(**patch)
+        super().perform_create(serializer)
     
-    def label_patcher(self):
-        # Deal with labels - currently only support:
-        # 1. one label at most for a company
-        # 2. public label, i.e., labels w/o user
-        labelInstance = self.get_label_instance()
-        if labelInstance:
-            return {
-                'labels': [labelInstance]
-            }
-        
-        return {}
-    
-    def get_label_instance(self):
-        return models.Label.objects.get(user__isnull=True, text=self.request.data['labels'][0]['text']) if (self.request.data.get('labels')) and len(self.request.data['labels']) == 1 else None
-        
+
 
 class CompanyRatingViewSet(BaseModelViewSet):
     model = models.CompanyRating
