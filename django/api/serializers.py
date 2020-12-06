@@ -226,12 +226,33 @@ class LinkSerializer(BaseSerializer):
         model = models.Link
         fields = ('text', 'user', 'url', 'order') + BaseSerializer.Meta.fields
 
+class LabelListSerializer(serializers.ListSerializer):
+    pass
 
 class LabelSerializer(BaseSerializer):
     class Meta:
         model = models.Label
         fields = ('user', 'text', 'color', 'order') + BaseSerializer.Meta.fields
+        list_serializer_class = LabelListSerializer
 
+class CompanyListSerializer(serializers.ListSerializer):
+    
+    def update(self, db_instances, validated_client_data, **kwargs):
+        # for relational (nested) field, only handles `labels` for company batch update
+        # since we transformed labels data to QuerySet instances in `validate_labels()`
+        # in child Serializer
+        
+        instance_mapping = {str(instance.uuid): instance for instance in db_instances}
+
+        updated_instances = []
+        for validated_company_data in validated_client_data:
+            company_uuid = validated_company_data['uuid']
+            instance = instance_mapping[company_uuid]
+            updated_instances.append(
+                self.child.update(instance, validated_company_data)
+            )
+        
+        return updated_instances
 
 class CompanySerializer(BaseSerializer):
     # setup user upon creation, see https://stackoverflow.com/questions/32509815/django-rest-framework-get-data-from-foreign-key-relation
@@ -259,6 +280,7 @@ class CompanySerializer(BaseSerializer):
     class Meta:
         model = models.Company
         fields = ('user', 'labels', 'name', 'hq_location', 'home_page', 'applications', 'labels') + BaseSerializer.Meta.fields
+        list_serializer_class = CompanyListSerializer
     
     def get_applications(self, company):
         return ApplicationSerializer(company.application_set.all(), many=True, context=self.context).data
@@ -266,8 +288,29 @@ class CompanySerializer(BaseSerializer):
     def validate(self, data):
         return super().validate(data)
     
-    def validate_labels(self, *args, **kwargs):
-        pass
+    def validate_labels(self, labels):
+        # validate and transform labels data to QuerySet instances
+
+        # TODO: when batch update companies, avoid querying the same labels
+
+        if labels:
+            # Deal with labels - currently only support:
+            # 1. one label at most for a company
+            # 2. public label, i.e., labels w/o user
+            if len(labels) > 1:
+                raise NotImplementedError(f'labels are more than one, but only single label is supported. labels=', labels)
+            label_data = labels[0]
+            
+            label_instance = None
+            if label_data.get('uuid'):
+                label_instance = models.Label.objects.get(user__isnull=True, text=label_data['uuid'])
+            if not label_instance and label_data.get('text'):
+                label_instance = models.Label.objects.get(user__isnull=True, text=label_data['text'])
+            
+            if label_instance:
+                return [label_instance]
+
+        return []
     
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
@@ -338,6 +381,8 @@ class ApplicationStatusLinkListSerializer(serializers.ListSerializer):
         """
             This ListSerializer is an instruction of when given a list of application status link instances,
             how we should call `ApplicationStatusLinkSerializer(...)`.
+            
+            This method should return the updated object instances.
 
             We do best effort when dealing with update of multiple instances(=objects):
             If the object is not in our database - we interpret this as a create request
