@@ -9,18 +9,21 @@
         "-v", "/Users/shaungc/Documents/repos/appl-tracky/appl-tracky-api:/usr/src"  
     ],
 
-    // do not specify these, otherwise vscode will assign a random port
+    // do not specify these, and do not press links within vscode terminal when in dev container, 
+    // otherwise vscode will assign a random port
     // if you specify, you may keep track of the issue below:
     // https://github.com/microsoft/vscode-remote-release/issues/1386
     // "appPort": [],
     // "forwardPorts": [],
 
     "extensions": [
-        "ms-python.python",
-        "visualstudioexptteam.vscodeintellicode"
+        "ms-toolsai.jupyter", // required by python
+        "donjayamanne.python-extension-pack", // python required by pylance
+        "ms-python.vscode-pylance",
     ],
 
     "settings": {
         "terminal.integrated.shell.linux": "/bin/zsh",
+        "python.pythonPath": "/usr/local/bin/python"
     }
 }
