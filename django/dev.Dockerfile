@@ -26,11 +26,11 @@ RUN apk update \
     # for cryptography required by `rest-social-auth`
     # https://stackoverflow.com/a/63836279/9814131
     && apk add libffi-dev openssl-dev \
-    && apk add zsh git
+    && apk add zsh git \
+    # for pip installing pylint
+    && apk add build-base && pip install --upgrade pip && pip install pylint
 
 # install dependencies
-# alpine version
-RUN pip install --upgrade pip
 COPY ./requirements.txt /usr/src/django/requirements.txt
 RUN pip install -r requirements.txt
 # cleanup db adapter installation artifacts
