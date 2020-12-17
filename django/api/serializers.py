@@ -279,7 +279,7 @@ class CompanySerializer(BaseSerializer):
 
     class Meta:
         model = models.Company
-        fields = ('user', 'labels', 'name', 'hq_location', 'home_page', 'applications', 'labels') + BaseSerializer.Meta.fields
+        fields = ('user', 'labels', 'name', 'hq_location', 'home_page', 'notes', 'applications', 'labels') + BaseSerializer.Meta.fields
         list_serializer_class = CompanyListSerializer
     
     def get_applications(self, company):
@@ -354,7 +354,7 @@ class ApplicationSerializer(BaseSerializer):
             'user', 
             'user_company', 'position_title', 
             'job_description_page', 'job_source', 
-            'labels', 'notes',
+            'labels', 'notes', 'job_description_notes',
             'statuses') + BaseSerializer.Meta.fields
     
     def get_statuses(self, application):
