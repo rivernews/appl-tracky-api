@@ -90,6 +90,8 @@ class Company(ManagedBaseModel):
     hq_location = models.OneToOneField('Address', on_delete=models.SET_NULL, null=True, blank=True)
     home_page = models.OneToOneField('Link', on_delete=models.SET_NULL, null=True, blank=True)
 
+    notes = models.TextField(blank=True, default='')
+
     @property
     def ratings(self):
         return self.companyrating_set.all()
@@ -169,6 +171,7 @@ class Application(ManagedBaseModel):
 
     labels = models.ManyToManyField('Label', blank=True)
     notes = models.TextField(blank=True, default='')
+    job_description_notes = models.TextField(blank=True, default='')
 
     def __str__(self):
         return self.position_title
