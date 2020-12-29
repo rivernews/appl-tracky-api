@@ -6,6 +6,25 @@ from . import filters
 
 # Create GraphQL type
 
+class PaginationConnection(graphene.relay.Connection):
+    class Meta:
+        abstract = True
+    
+    # refer to issue
+    # https://github.com/graphql-python/graphene-django/issues/636#issuecomment-492031448
+    # this is the offical recommended way - add it (total_count, etc) yourself
+    # see https://github.com/graphql-python/graphene/issues/307
+    # graphql spec on pagination
+    # https://graphql.org/learn/pagination/
+
+    total_count = graphene.Int()
+    def resolve_total_count(root, info):
+        return root.length
+    
+    count = graphene.Int()
+    def resolve_count(root, info):
+        return len(root.edges)
+
 class UserType(DjangoObjectType):
     class Meta:
         model = models.CustomUser
@@ -26,6 +45,7 @@ class CompanyNode(DjangoObjectType):
     class Meta:
         model = models.Company
         filterset_class = filters.GraphQLCompanyFilter
+        connection_class = PaginationConnection
         interfaces = (graphene.relay.Node,)
 
 class CompanyRatingType(DjangoObjectType):
