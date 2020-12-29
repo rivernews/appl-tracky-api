@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_filters', 'rest_framework_filters',
     'social_django', 'rest_social_auth', # django social auth + rest social auth
     'cacheops',
+    'graphene_django',
 
     'api.apps.ApiConfig',
     'search.apps.SearchConfig',
