@@ -25,7 +25,7 @@ class LabelType(DjangoObjectType):
 class CompanyNode(DjangoObjectType):
     class Meta:
         model = models.Company
-        filterset_class = filters.CompanyFilter
+        filterset_class = filters.GraphQLCompanyFilter
         interfaces = (graphene.relay.Node,)
 
 class CompanyRatingType(DjangoObjectType):
