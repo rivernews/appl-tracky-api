@@ -15,6 +15,12 @@ def ownership_filter_queryset(func):
             request = args[1]
         
         queryset = func(*args, **kwargs)
+
+        # `request` is not guranteed
+        # see django-filter doc
+        # https://django-filter.readthedocs.io/en/stable/guide/usage.html#request-based-filtering
+        if request is None:
+            return queryset.none()
         
         try:
             if (not request.user.is_superuser) and queryset.model._meta.get_field('user'):
@@ -40,13 +46,26 @@ class LabelFilter(filters.FilterSet):
 def company_label_filter_get_queryset(request):
     return models.Label.objects.all()
 
-
 class CompanyFilter(filters.FilterSet):
-    labels = filters.RelatedFilter(LabelFilter, field_name='labels', queryset=company_label_filter_get_queryset)
+    labels = filters.RelatedFilter(filterset=LabelFilter, field_name='labels', queryset=company_label_filter_get_queryset)
 
     class Meta:
         model = models.Company
-        fields = {'labels': ['isnull']}
+        fields = {
+            'labels': ['isnull'],
+
+            # even if `LabelFilter` specified `text` field, seems graphene-django cannot recognize it,
+            # so we have to explicitly specify here again
+            # see SO question (graphene-django not supporting nested field)
+            # https://stackoverflow.com/questions/49326217/graphene-django-nested-filters-relay
+            'labels__text': ['exact']
+        }
+    
+    # added for graphene-django
+    # because it does not support global filter backend
+    @property
+    def qs(self):
+        return super().qs.filter(user=self.request.user)
 
 
 class OwnershipFilterBackend(filter_backends.RestFrameworkFilterBackend):
