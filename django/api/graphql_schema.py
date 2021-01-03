@@ -41,13 +41,6 @@ class LabelType(DjangoObjectType):
     class Meta:
         model = models.Label
 
-class CompanyNode(DjangoObjectType):
-    class Meta:
-        model = models.Company
-        filterset_class = filters.GraphQLCompanyFilter
-        connection_class = PaginationConnection
-        interfaces = (graphene.relay.Node,)
-
 class CompanyRatingType(DjangoObjectType):
     class Meta:
         model = models.CompanyRating
@@ -55,6 +48,17 @@ class CompanyRatingType(DjangoObjectType):
 class ApplicationType(DjangoObjectType):
     class Meta:
         model = models.Application
+
+class CompanyNode(DjangoObjectType):
+    applications = graphene.List(ApplicationType)
+    class Meta:
+        model = models.Company
+        filterset_class = filters.GraphQLCompanyFilter
+        connection_class = PaginationConnection
+        interfaces = (graphene.relay.Node,)
+    
+    def resolve_applications(root, info):
+        return root.applications.all()
 
 class PositionLocationType(DjangoObjectType):
     class Meta:

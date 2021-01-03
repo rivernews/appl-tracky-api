@@ -2,7 +2,7 @@ from django.conf.urls import url, include
 
 from rest_framework import routers
 from graphene_django.views import GraphQLView
-from . import views
+from . import views, graphql_views
 from . import graphql_schema
 
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
@@ -43,5 +43,5 @@ urlpatterns = [
     url(r'^api/', include(router.urls)),
 
     # GraphQL endpoints
-    url(r"graphql", GraphQLView.as_view(graphiql=True, schema=graphql_schema.schema)),
+    url(r"graphql", graphql_views.PrivateGraphQLView.as_view(graphiql=True, schema=graphql_schema.schema)),
 ]

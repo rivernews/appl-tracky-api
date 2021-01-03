@@ -92,6 +92,8 @@ class GraphQLCompanyFilter(FilterSet):
     # because it does not support global filter backend like DRF
     @property
     def qs(self):
+        # assume user is already authenticated (login checked)
+        # guaranteed this in view
         queryset = super().qs
         if self.request.user.is_superuser:
             return queryset
