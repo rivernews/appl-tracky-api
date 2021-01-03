@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_filters', 'rest_framework_filters',
     'social_django', 'rest_social_auth', # django social auth + rest social auth
     'cacheops',
+    'graphene_django',
 
     'api.apps.ApiConfig',
     'search.apps.SearchConfig',
@@ -271,8 +272,11 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        # only allow session in development for easy debugging
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
+    ) if DEBUG else (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
 }
 
