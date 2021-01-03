@@ -9,6 +9,7 @@ djangorestframework-jwt >= 1.11,<1.12
 
 django-filter==2.2.0
 djangorestframework-filters>=1.0.0.dev0
+graphene-django==2.14.0
 
 rest-social-auth < 2.1
 
