@@ -20,6 +20,9 @@ module "appl_tracky_api" {
   cors_domain_whitelist   = ["rivernews.github.io", "appl-tracky.shaungc.com"]
   app_container_image     = "shaungc/appl-tracky-api"
   app_container_image_tag = var.app_container_image_tag
+
+  use_recreate_deployment_strategy = true
+
   app_secret_name_list = [
     "/provider/aws/account/iriversland2-15pro/AWS_REGION",
     "/provider/aws/account/iriversland2-15pro/AWS_ACCESS_KEY_ID",
