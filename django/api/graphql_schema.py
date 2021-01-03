@@ -17,8 +17,8 @@ class PaginationConnection(graphene.relay.Connection):
     # graphql spec on pagination
     # https://graphql.org/learn/pagination/
 
-    total_count = graphene.Int()
-    def resolve_total_count(root, info):
+    totalCount = graphene.Int()
+    def resolve_totalCount(root, info):
         return root.length
     
     count = graphene.Int()
@@ -82,4 +82,4 @@ class APIQuery(ObjectType):
 class RootQuery(APIQuery, ObjectType):
     pass
 
-schema = graphene.Schema(query=RootQuery)
+schema = graphene.Schema(query=RootQuery, auto_camelcase=False)
