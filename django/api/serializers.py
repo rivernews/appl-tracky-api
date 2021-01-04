@@ -358,7 +358,7 @@ class ApplicationSerializer(BaseSerializer):
             'statuses') + BaseSerializer.Meta.fields
     
     def get_statuses(self, application):
-        return ApplicationStatusSerializer(application.applicationstatus_set.all(), many=True, context=self.context).data
+        return ApplicationStatusSerializer(application.applicationstatus_set.all().order_by('-date'), many=True, context=self.context).data
     
 class PositionLocationSerializer(BaseSerializer):
 
