@@ -81,7 +81,9 @@ class GraphQLCompanyFilter(FilterSet):
             # so we have to explicitly specify relational fields here
             # see SO question (graphene-django not supporting nested filter)
             # https://stackoverflow.com/questions/49326217/graphene-django-nested-filters-relay
-            'labels__text': ['exact']
+            'labels__text': ['exact'],
+            
+            'name': ['icontains']
         }
     
     order_by = OrderingFilter(fields=(
