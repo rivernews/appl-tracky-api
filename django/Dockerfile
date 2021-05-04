@@ -14,7 +14,7 @@ COPY . .
 # prepare db adapter dev env (psycopg2)
 RUN apk update \
     && apk add --virtual build-deps gcc python3-dev musl-dev \
-    && apk add postgresql-dev \
+    && apk add postgresql-dev postgresql-client \
     # fix error `ffi.h: No such file or directory`
     # https://github.com/jfloff/alpine-python/issues/44
     && apk add libffi-dev
