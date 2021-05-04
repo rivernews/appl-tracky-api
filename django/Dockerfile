@@ -1,5 +1,5 @@
 # pull official base image
-FROM python:3.7-alpine
+FROM python:3.8-alpine
 
 # set environment varibles
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -17,7 +17,10 @@ RUN apk update \
     && apk add postgresql-dev postgresql-client \
     # fix error `ffi.h: No such file or directory`
     # https://github.com/jfloff/alpine-python/issues/44
-    && apk add libffi-dev
+    && apk add libffi-dev \
+    # resolve `pip install cryptography` error
+    # https://stackoverflow.com/questions/35736598/cannot-pip-install-cryptography-in-docker-alpine-linux-3-3-with-openssl-1-0-2g
+    && apk add openssl-dev cargo
 
 # install dependencies
 RUN pip install --upgrade pip
