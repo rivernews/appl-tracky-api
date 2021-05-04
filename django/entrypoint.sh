@@ -1,25 +1,40 @@
 #!/bin/sh
 
-if [ "$DATABASE" = "postgres" ]
-then
-    echo "Waiting for postgres..."
+set -ex
 
-    while ! nc -z $SQL_HOST $SQL_PORT; do
-      sleep 0.1
-    done
+# if [ "$DATABASE" = "postgres" ]
+# then
+#     echo "Waiting for postgres..."
 
-    echo "PostgreSQL started"
+#     while ! nc -z $SQL_HOST $SQL_PORT; do
+#       sleep 0.1
+#     done
+
+#     echo "PostgreSQL started"
+# fi
+
+export PGPASSWORD=$SQL_PASSWORD
+export DEFAULT_DATABASE=default_database
+
+if psql -h $SQL_HOST -p $SQL_PORT -U $SQL_USER $DEFAULT_DATABASE -tc "SELECT 1 FROM pg_database WHERE datname = '${SQL_DATABASE}'" | grep -q 1; then
+    echo "Database ${SQL_DATABASE} already exist, will skip restore and just do a migrate"
+    python manage.py migrate
+else
+    echo "Database ${SQL_DATABASE} does not exist, will now restore data from S3"
+
+    # pull latest json from s3
+    BUCKET=appl-tracky-backup
+    s3_key=$(aws s3 ls s3://${BUCKET}/db-backup --recursive | sort | tail -n 1 | awk '{print $4}')
+    aws s3 cp "s3://${BUCKET}/${s3_key}" db_backup.json
+
+    psql -h $SQL_HOST -p $SQL_PORT -U $SQL_USER $DEFAULT_DATABASE -c "CREATE DATABASE ${SQL_DATABASE}"
+
+    # migrate db using Django's schema, trim tables
+    python manage.py migrate && echo "delete from auth_permission; delete from django_content_type;" | python manage.py dbshell
+
+    # load into postgres VIA DJANGO manage command
+    python manage.py loaddata db_backup.json
 fi
-
-# to claer out the data, see https://stackoverflow.com/questions/7907456/emptying-the-database-through-djangos-manage-py
-# python manage.py flush --no-input
-# python manage.py migrate --fake
-
-# this will only run on a fresh provision and the following.
-# if you do `flush`, then this `migrate` will not work
-python manage.py makemigrations
-# python manage.py makemigrations api
-python manage.py migrate
 
 python manage.py collectstatic --clear --noinput
 python manage.py collectstatic --no-input
