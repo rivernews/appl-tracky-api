@@ -16,7 +16,6 @@ module "appl_tracky_api" {
   aws_access_key = var.aws_access_key
   aws_secret_key = var.aws_secret_key
   cluster_name   = data.aws_ssm_parameter.kubernetes_cluster_name.value
-  node_pool_name = "project-shaungc-digitalocean-node-pool"
 
   app_label               = "appl-tracky-api"
   app_exposed_port        = 8001
