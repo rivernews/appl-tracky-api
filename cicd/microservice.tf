@@ -10,7 +10,7 @@ data "aws_ssm_parameter" "kubernetes_cluster_name" {
 
 module "appl_tracky_api" {
   source  = "rivernews/kubernetes-microservice/digitalocean"
-  version = "v0.1.18"
+  version = "v0.1.33"
 
   aws_region     = var.aws_region
   aws_access_key = var.aws_access_key
@@ -67,10 +67,5 @@ module "appl_tracky_api" {
 
       command = ["/bin/sh", "-c", "echo Starting cron job... && sleep 5 && cd /usr/src/django && echo Finish CD && python manage.py backup_db && echo Finish dj command"]
     },
-  ]
-
-  depend_on = [
-    # module.postgres_cluster.app_container_image,
-    # module.redis_cluster.app_container_image
   ]
 }
