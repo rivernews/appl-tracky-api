@@ -349,7 +349,7 @@ if ADMINS != []:
     ADMINS = [ tuple(data_pair.split(',')) for data_pair in ADMINS.split('|') ]
 
 # Image storage
-PRIVATE_IMAGE_AWS_REGION = os.getenv('AWS_REGION', '')
+PRIVATE_IMAGE_AWS_REGION = os.getenv('PRIVATE_IMAGE_AWS_REGION', '')
 PRIVATE_IMAGE_AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
 PRIVATE_IMAGE_AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
 PRIVATE_IMAGE_BUCKET_NAME = os.getenv('PRIVATE_IMAGE_BUCKET_NAME', '')

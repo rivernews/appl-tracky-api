@@ -4,15 +4,18 @@ variable "aws_secret_key" {}
 variable "aws_region" {}
 variable "app_container_image_tag" {}
 
+data "aws_ssm_parameter" "kubernetes_cluster_name" {
+  name  = "terraform-managed.garage.cluster-name"
+}
+
 module "appl_tracky_api" {
   source  = "rivernews/kubernetes-microservice/digitalocean"
-  version = "v0.1.18"
+  version = "v0.1.33"
 
   aws_region     = var.aws_region
   aws_access_key = var.aws_access_key
   aws_secret_key = var.aws_secret_key
-  cluster_name   = "project-shaungc-digitalocean-cluster"
-  node_pool_name = "project-shaungc-digitalocean-node-pool"
+  cluster_name   = data.aws_ssm_parameter.kubernetes_cluster_name.value
 
   app_label               = "appl-tracky-api"
   app_exposed_port        = 8001
@@ -30,6 +33,8 @@ module "appl_tracky_api" {
 
     "/app/appl-tracky/DJANGO_SECRET_KEY",
     "/app/appl-tracky/ADMINS",
+    "/app/appl-tracky/PRIVATE_IMAGE_BUCKET_NAME",
+    "/app/appl-tracky/PRIVATE_IMAGE_AWS_REGION",
 
     "/app/appl-tracky/SQL_ENGINE",
     "/app/appl-tracky/SQL_DATABASE",
@@ -59,14 +64,9 @@ module "appl_tracky_api" {
       name          = "db-backup-cronjob",
 
       # every day 11:00pm PST, to avoid the maintenance windown of digitalocean in 12-4am
-      cron_schedule = "0 6 * * *", 
+      cron_schedule = "0 6 * * *",
 
       command = ["/bin/sh", "-c", "echo Starting cron job... && sleep 5 && cd /usr/src/django && echo Finish CD && python manage.py backup_db && echo Finish dj command"]
     },
-  ]
-
-  depend_on = [
-    # module.postgres_cluster.app_container_image,
-    # module.redis_cluster.app_container_image
   ]
 }
