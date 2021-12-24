@@ -10,7 +10,7 @@ psycopg2 >= 2.0,<2.9
 
 gunicorn == 19.9.0
 
-djangorestframework==3.9.1
+djangorestframework==3.11.2
 django-cors-headers==2.4.0
 djangorestframework-jwt >= 1.11,<1.12 # repo deprecated, see https://github.com/jpadilla/django-rest-framework-jwt
 
