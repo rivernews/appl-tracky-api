@@ -276,10 +276,6 @@ class ApplicationStatusLinkViewSet(BaseModelViewSet):
     queryset = models.ApplicationStatusLink.objects.none()
     serializer_class = ApiSerializers.ApplicationStatusLinkSerializer
 
-# DRF exempts CSRF too - https://stackoverflow.com/questions/51931856/how-does-drf-turn-off-csrf-token-check-for-jwt-based-authentication
-# and it only enables CSRF if session auth is used
-# JWT does not need CSRF so we can safely disable it here
-# there is a debate whether JWT is better than httpOnly cookie (CSRF required) - https://stackoverflow.com/a/52507865/9814131
 class PrivateImageView(APIView):
     BUCKET_NAME = settings.PRIVATE_IMAGE_BUCKET_NAME
     FILENAME_LEN_LIMIT = 40
