@@ -76,7 +76,7 @@ if not DEBUG:
 # You will need to have nginx set the proxy header `X_FORWARDED_PROTO` to `https` when client request is indeed https.
 # If you don't configure nginx and django don't receive the header and perceive the request as insecure (http), as you turn `SECURE_SSL_REDIRECT` on, you will get an infinite loop: django will redirect all your request which makes another (https) request, and so on.
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True 
+    SECURE_SSL_REDIRECT = True
 
 # Django CORS header settings
 CORS_ORIGIN_WHITELIST = tuple(filter(bool, [ # filter: https://stackoverflow.com/questions/3845423/remove-empty-strings-from-a-list-of-strings
@@ -86,10 +86,10 @@ CORS_ORIGIN_WHITELIST = tuple(filter(bool, [ # filter: https://stackoverflow.com
 
 # This sets the header to '*'. if frontend are sending credentials, you cannot use this.
 # and needs to use CORS_ORIGIN_WHITELIST instead
-# CORS_ORIGIN_ALLOW_ALL = True 
+# CORS_ORIGIN_ALLOW_ALL = True
 
 # This is necessary if frontend is sending auth credentials, otherwise browser will raise error:
-# "The value of the 'Access-Control-Allow-Credentials' header in the response is '' 
+# "The value of the 'Access-Control-Allow-Credentials' header in the response is ''
 # which must be 'true' when the request's credentials mode is 'include'."
 CORS_ALLOW_CREDENTIALS = True # this includes cookie and JWT auth tokens
 
@@ -101,7 +101,7 @@ MIDDLEWARE = [
 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -266,7 +266,7 @@ REST_FRAMEWORK = {
         'anon': '20/min',
         'user': '180/min'
     },
-    
+
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated', # this will make all endpoints require login by default for all CRUD operations.
     ),
@@ -347,3 +347,9 @@ EMAIL_SUBJECT_PREFIX = '[Appl Tracky API Server Notifier] '
 ADMINS = os.getenv('ADMINS', [])
 if ADMINS != []:
     ADMINS = [ tuple(data_pair.split(',')) for data_pair in ADMINS.split('|') ]
+
+# Image storage
+PRIVATE_IMAGE_AWS_REGION = os.getenv('AWS_REGION', '')
+PRIVATE_IMAGE_AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
+PRIVATE_IMAGE_AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
+PRIVATE_IMAGE_BUCKET_NAME = os.getenv('PRIVATE_IMAGE_BUCKET_NAME', '')

@@ -1,16 +1,25 @@
-from django.shortcuts import render
+import os
+import uuid
+
+from django.http.response import JsonResponse
+
 from django.views.generic import TemplateView
-from django.core.exceptions import FieldDoesNotExist, PermissionDenied
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.core.exceptions import PermissionDenied
+from django.utils.encoding import smart_str
+from django.conf import settings
+
 from . import models
 from rest_framework import viewsets
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_social_auth.views import SocialJWTUserAuthView
 from . import serializers as ApiSerializers
 
 from rest_framework import serializers
+from rest_framework.permissions import AllowAny
 
 from . import permissions as ApiPermissions
 
@@ -23,6 +32,17 @@ from . import filters as ApiFilters
 from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.migrations.executor import MigrationExecutor
 from django.http import HttpResponse
+
+import requests
+import boto3
+
+# boto3 S3
+# https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html
+s3_service = boto3.resource(
+    service_name='s3', aws_access_key_id=settings.PRIVATE_IMAGE_AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.PRIVATE_IMAGE_AWS_SECRET_ACCESS_KEY,
+    region_name=settings.PRIVATE_IMAGE_AWS_REGION
+)
 
 # Create your views here.
 class ApiHomeView(TemplateView):
@@ -37,7 +57,7 @@ class ApiHomeView(TemplateView):
             print("ERROR: pending database migration exists. Will stop and respond 503, please do the migration first so Django can be ready to serve request.")
             status = 503
             return HttpResponse(status=status)
-    
+
     def get_context_data(self,*args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         context['context_test_msg'] = 'context passed in message successfully'
@@ -53,7 +73,7 @@ class SocialAuthView(SocialJWTUserAuthView):
 """
 
 class BaseModelViewSet(viewsets.ModelViewSet):
-    
+
     model = None
     permission_classes = (ApiPermissions.OwnerOnlyObjectPermission,)
 
@@ -65,19 +85,19 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         elif not self.request.user.is_authenticated:
             print("user not login", self.request.user)
             raise PermissionError
-        
+
         # restrict access for owner-only models
         if ApiUtils.is_model_field_exist(self.model, 'user'):
             return self.model.objects.filter(user=self.request.user)
         else:
             return self.model.objects.all()
-    
+
     # def perform_create(self, serializer):
     #     """
     #         After serializer's .is_valid() call:
-    #         The create() method of our serializer will now be passed 
+    #         The create() method of our serializer will now be passed
     #         an additional 'user' field, along with the validated data from the request.
-            
+
     #         refer to: https://www.django-rest-framework.org/tutorial/4-authentication-and-permissions/
     #     """
     #     if ApiUtils.is_model_field_exist(self.model, 'user'):
@@ -124,7 +144,7 @@ class CompanyViewSet(BaseModelViewSet):
 
     def create(self, request):
         return super().create(request)
-    
+
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
 
@@ -142,7 +162,7 @@ class CompanyViewSet(BaseModelViewSet):
             1. Sets partial=True
             2. Call viewset.update()
         """
-        
+
         # detect if it's a batch update or not
         if isinstance(request.data, list):
             # get all instances (db objects) so we can use them to update db
@@ -151,7 +171,7 @@ class CompanyViewSet(BaseModelViewSet):
                 if not partial_company.get('uuid'):
                     raise Exception('CompanyPathError: PATCH requires at least uuid in the object. Request data is ' + str(request.data)[:1000] + '...')
                 uuids_to_patch.append(partial_company['uuid'])
-            
+
             db_instances = self.get_queryset().filter(uuid__in=uuids_to_patch)
 
             # create serializer while using partial=True
@@ -163,7 +183,7 @@ class CompanyViewSet(BaseModelViewSet):
                 context={'request': self.request}
             )
 
-            # validate it 
+            # validate it
             list_serializer.is_valid(raise_exception=True)
 
             # pass over to update processes
@@ -171,7 +191,7 @@ class CompanyViewSet(BaseModelViewSet):
             return Response(list_serializer.data)
 
         return super().partial_update(request, *args, **kwargs)
-    
+
     def update(self, request, *args, **kwargs):
         """
             1. Load data into serializer --> permission check
@@ -180,17 +200,17 @@ class CompanyViewSet(BaseModelViewSet):
         """
 
         return super().update(request, *args, **kwargs)
-    
+
     def perform_update(self, serializer) -> None:
         """
             1. Serializer commit data change, i.e. serializer.save() --> serializer.update()
         """
 
         super().perform_update(serializer)
-    
+
     def perform_create(self, serializer):
         super().perform_create(serializer)
-    
+
 
 
 class CompanyRatingViewSet(BaseModelViewSet):
@@ -235,10 +255,10 @@ class ApplicationStatusViewSet(BaseModelViewSet):
         # since DRF doesn't handle one-to-many update for us, we need to start from scratch - from request.data, before we call the serializer class.
         data_list = self.request.data.get('applicationstatuslink_set', [])
         list_serializer = ApiSerializers.ApplicationStatusLinkSerializer(
-            # appstatuslink_instances_list, 
-            serializer.instance.applicationstatuslink_set.all(), 
-            data=data_list, 
-            many=True, 
+            # appstatuslink_instances_list,
+            serializer.instance.applicationstatuslink_set.all(),
+            data=data_list,
+            many=True,
             context={'request': self.request},
         )
 
@@ -249,9 +269,78 @@ class ApplicationStatusViewSet(BaseModelViewSet):
                 application_status=serializer.instance,
             )
         else:
-            raise serializers.ValidationError(str(list_serializer.errors)) 
+            raise serializers.ValidationError(str(list_serializer.errors))
 
 class ApplicationStatusLinkViewSet(BaseModelViewSet):
     model = models.ApplicationStatusLink
     queryset = models.ApplicationStatusLink.objects.none()
     serializer_class = ApiSerializers.ApplicationStatusLinkSerializer
+
+# DRF exempts CSRF too - https://stackoverflow.com/questions/51931856/how-does-drf-turn-off-csrf-token-check-for-jwt-based-authentication
+# and it only enables CSRF if session auth is used
+# JWT does not need CSRF so we can safely disable it here
+# there is a debate whether JWT is better than httpOnly cookie (CSRF required) - https://stackoverflow.com/a/52507865/9814131
+class PrivateImageView(APIView):
+    BUCKET_NAME = settings.PRIVATE_IMAGE_BUCKET_NAME
+    FILENAME_LEN_LIMIT = 40
+
+    # we let GET public but not POST. We'll check permission manually in POST view.
+    permission_classes = [AllowAny]
+
+    def _get_signed_url(self, key):
+        return s3_service.meta.client.generate_presigned_url(
+            ClientMethod="get_object", ExpiresIn=600,
+            Params={
+                "Bucket": self.BUCKET_NAME,
+                "Key": key,
+            },
+        )
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            raise PermissionDenied
+
+        imagefile = request.FILES.get('file')
+
+        # truncate the file name
+        imagefilename = imagefile.name
+        if '.' in imagefilename:
+            *imagefilename_woext, ext = imagefilename.split('.')
+            imagefilename_woext = ''.join(imagefilename_woext)
+        else:
+            imagefilename_woext = imagefilename
+            ext = ''
+        if len(imagefilename_woext) > self.FILENAME_LEN_LIMIT:
+            imagefilename_woext = imagefilename_woext[:self.FILENAME_LEN_LIMIT//2] + '...' + imagefilename_woext[-self.FILENAME_LEN_LIMIT//2:]
+            imagefilename = imagefilename_woext
+            if ext:
+                imagefilename += f'.{ext}'
+
+        # TODO: check file type is image; set size limit
+        imagekey = f'{request.user.username}/{uuid.uuid4()}_{imagefilename}'
+        s3_service.Bucket(self.BUCKET_NAME).put_object(Key=imagekey, Body=imagefile)
+
+        return JsonResponse({
+            'image_url': f'{request.scheme}://{request.get_host()}{request.path}?id={imagekey}'
+        }, status=200)
+
+    def get(self, request, *args, **kwargs):
+        '''Expects query parameter `?id=username/image/file/path`
+        '''
+
+        imagekey = request.GET.get('id', '')
+        # TODO: in the future enhance private image security
+        # imagekey_username, *_ = imagekey.split('/')
+        # if not (request.user.is_authenticated and request.user.username == imagekey_username):
+        #     raise PermissionDenied
+
+        url = self._get_signed_url(key=imagekey)
+
+        r = requests.get(url=url, stream=True)
+        r.raise_for_status()
+        response = HttpResponse(r.raw, content_type='application/force-download')
+
+        filename = os.path.basename(imagekey)
+        response['Content-Disposition'] = 'attachment; filename={filename}'.format(filename=smart_str(filename))
+
+        return response
