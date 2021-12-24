@@ -1,7 +1,6 @@
 from django.conf.urls import url, include
 
 from rest_framework import routers
-from graphene_django.views import GraphQLView
 from . import views, graphql_views
 from . import graphql_schema
 
@@ -34,14 +33,17 @@ urlpatterns = [
 
     # login URLs for the browsable API.
     url(r'^login/', include('rest_framework.urls', namespace='rest_framework')),
-    
+
     # JWT token endpoint
     url(r'^api/api-token-auth/', obtain_jwt_token),
     url(r'^api/api-token-refresh/', refresh_jwt_token),
+
+    # image upload endpoint
+    url(r'^api/private-image/', views.PrivateImageView.as_view(), name='private-image'),
 
     # REST API endpoints
     url(r'^api/', include(router.urls)),
 
     # GraphQL endpoints
-    url(r"graphql", graphql_views.PrivateGraphQLView.as_view(graphiql=True, schema=graphql_schema.schema)),
+    url(r"graphql", graphql_views.PrivateGraphQLView.as_view(graphiql=True, schema=graphql_schema.schema))
 ]
