@@ -34,6 +34,7 @@ module "appl_tracky_api" {
     "/app/appl-tracky/DJANGO_SECRET_KEY",
     "/app/appl-tracky/ADMINS",
     "/app/appl-tracky/PRIVATE_IMAGE_BUCKET_NAME",
+    "/app/appl-tracky/PRIVATE_IMAGE_AWS_REGION",
 
     "/app/appl-tracky/SQL_ENGINE",
     "/app/appl-tracky/SQL_DATABASE",
