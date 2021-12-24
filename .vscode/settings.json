@@ -1,4 +1,4 @@
 {
-    "python.pythonPath": "${workspaceFolder}/django/venv/bin/python",
-    "python.formatting.provider": "yapf"
+    "python.defaultInterpreterPath": "${workspaceFolder}/django/venv/bin/python",
+    "python.formatting.provider": "yapf",
 }
