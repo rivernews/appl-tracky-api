@@ -293,7 +293,8 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
-    'USER_ID_FIELD': 'uuid'
+    'USER_ID_FIELD': 'uuid',
+    'AUTH_HEADER_TYPES': ('JWT',)
 }
 
 # Social Auth
