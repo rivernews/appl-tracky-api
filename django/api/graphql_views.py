@@ -1,6 +1,5 @@
 import json
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from graphene_django.views import GraphQLView
 
 from django.views.decorators.csrf import csrf_exempt
@@ -10,7 +9,7 @@ from django.utils.decorators import method_decorator
 
 from django.http import HttpResponse
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
@@ -19,7 +18,7 @@ from rest_framework import status
 class PrivateGraphQLView(GraphQLView):
     raise_exception = True
 
-    authentication_classes = [JSONWebTokenAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def authenticate_request(self, request):

@@ -1,11 +1,11 @@
 from rest_framework.settings import api_settings
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import FieldDoesNotExist, FieldError
+from django.core.exceptions import FieldError
 from django.contrib.auth.models import Group
 from . import models
 from rest_framework import serializers
-from rest_social_auth.serializers import UserJWTSerializer
+from rest_social_auth.serializers import UserJWTPairSerializer
 
 from . import utils as ApiUtils
 
@@ -40,12 +40,12 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
                 You will create relational instances manually by `Model.objects.create(...)`,
             What to return:
                 Return the created instance.
-            
+
             See https://www.django-rest-framework.org/api-guide/serializers/#writing-create-methods-for-nested-representations
 
             ** In order to use nested serializer fields, you have to write this .create() function
         """
-        
+
         # create relational objects
         one_to_one_fields_data = self.create_one_to_one_fields(validated_data)
 
@@ -55,17 +55,17 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         # remove uuid to avoid writing to uuid field
         # if 'uuid' in validated_data:
         #     del validated_data['uuid']
-        
+
         # include user info whenever possible
         self.inject_user_info_data(self.Meta.model, validated_data)
-        
+
         # create main model obj
         new_model_object = ApiUtils.create_instance(self.Meta.model, {
             **validated_data, **one_to_one_fields_data
         }, excluded_fields=self.many_to_many_fields)
 
         # many to many fields have to be handled separately when create() for parent object
-        # (main model obj), because many-to-many field can only be assigned after parent 
+        # (main model obj), because many-to-many field can only be assigned after parent
         # object got created in db and has a pk.
         #
         # many to many fields are assigned by `.add()` method and it writes to db,
@@ -77,7 +77,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
                 many_to_many_field.add(many_to_many_field_object.pk)
 
         return new_model_object
-    
+
     def update(self, instance, validated_data):
         """
             Update function is a best effort base service.
@@ -96,7 +96,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         ApiUtils.update_instance(instance, validated_data, excluded_fields=self.one_to_one_fields)
 
         return instance
-    
+
     def update_one_to_one_fields(self, instance, validated_data):
         for field_name, instance_model in self.one_to_one_fields.items():
             if field_name in validated_data and ApiUtils.is_instance_field_exist(instance, field_name):
@@ -112,7 +112,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
                 if one_to_one_field_instance:
                     # after we update, we don't need to update subject instance since it references to that one to one model
                     ApiUtils.update_instance(one_to_one_field_instance, one_to_one_data)
-    
+
     def create_one_to_one_fields(self, validated_data):
         one_to_one_fields = {}
         for field_name, instance_model in self.one_to_one_fields.items():
@@ -128,9 +128,9 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
 
             # create model object
             one_to_one_fields[field_name] = ApiUtils.create_instance(instance_model, one_to_one_data)
-            
+
         return one_to_one_fields
-    
+
     def create_or_get_many_to_many_fields(self, validated_data, create=False):
         """Method to return data of many to many fields.
             Currently just used for `labels` many-to-many fields, which is a fixed collection
@@ -142,22 +142,22 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
 
         if create:
             raise NotImplementedError('create_or_get_many_to_many_fields() not yet implemented for auto creating many-to-many field objects')
-        
+
         many_to_many_fields_data = {}
         for field_name, model in self.many_to_many_fields.items():
             many_to_many_fields_data[field_name] = []
 
             many_to_many_field_object_list = validated_data.pop(field_name)
-            
+
             if create:
                 # many to many field object(s) not yet in db
                 for many_to_many_field_object_data in many_to_many_field_object_list:
-                    # TODO: create many to many object in db using 
+                    # TODO: create many to many object in db using
                     # `many_to_many_field_object` supplied from frontend;
                     # use `ApiUtils.create_instance` to make sure all embedded relational fields are covered
                     many_to_many_field_instance = many_to_many_field_object_data
-                    
-                    # include user info if necessary (when current user creating the 
+
+                    # include user info if necessary (when current user creating the
                     # many to many field object)
                     self.inject_user_info_data(model, many_to_many_field_instance)
 
@@ -167,9 +167,9 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
                 # the serializer should already pull out instances from db for `many_to_many_field_object_list`
                 # so just put them in returned dict
                 many_to_many_fields_data[field_name] = many_to_many_field_object_list
-        
+
         return many_to_many_fields_data
-    
+
     def inject_user_info_data(self, model, one_to_one_data):
         if ApiUtils.is_model_field_exist(model, 'user'):
             request = self.context.get('request', None)
@@ -178,7 +178,7 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
                     one_to_one_data['user'] = request.user
                 else:
                     raise FieldError('One to one field object requires a user field, but user is not authenticated. Please make sure you login.')
-    
+
     class Meta:
         model = None
         fields = (api_settings.URL_FIELD_NAME, 'uuid', 'modified_at')
@@ -192,13 +192,13 @@ class UserSerializer(BaseSerializer):
         fields = (api_settings.URL_FIELD_NAME, 'email', 'first_name', 'last_name')
 
 
-class SocialAuthUserSerializer(UserJWTSerializer):
+class SocialAuthUserSerializer(UserJWTPairSerializer):
     """
     For social login endpoint to decide what to respond to frontend upon login (work with JWT)
     """
     class Meta:
         model = get_user_model()
-        exclude = UserJWTSerializer.Meta.exclude + ('uuid', 'username',)
+        exclude = UserJWTPairSerializer.Meta.exclude + ['uuid', 'username']
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
@@ -236,12 +236,12 @@ class LabelSerializer(BaseSerializer):
         list_serializer_class = LabelListSerializer
 
 class CompanyListSerializer(serializers.ListSerializer):
-    
+
     def update(self, db_instances, validated_client_data, **kwargs):
         # for relational (nested) field, only handles `labels` for company batch update
         # since we transformed labels data to QuerySet instances in `validate_labels()`
         # in child Serializer
-        
+
         instance_mapping = {str(instance.uuid): instance for instance in db_instances}
 
         updated_instances = []
@@ -251,7 +251,7 @@ class CompanyListSerializer(serializers.ListSerializer):
             updated_instances.append(
                 self.child.update(instance, validated_company_data)
             )
-        
+
         return updated_instances
 
 class CompanySerializer(BaseSerializer):
@@ -281,13 +281,13 @@ class CompanySerializer(BaseSerializer):
         model = models.Company
         fields = ('user', 'labels', 'name', 'hq_location', 'home_page', 'notes', 'applications', 'labels') + BaseSerializer.Meta.fields
         list_serializer_class = CompanyListSerializer
-    
+
     def get_applications(self, company):
         return ApplicationSerializer(company.application_set.all(), many=True, context=self.context).data
-    
+
     def validate(self, data):
         return super().validate(data)
-    
+
     def validate_labels(self, labels):
         # validate and transform labels data to QuerySet instances
 
@@ -300,26 +300,26 @@ class CompanySerializer(BaseSerializer):
             if len(labels) > 1:
                 raise NotImplementedError(f'labels are more than one, but only single label is supported. labels=', labels)
             label_data = labels[0]
-            
+
             label_instance = None
             if label_data.get('uuid'):
                 label_instance = models.Label.objects.get(user__isnull=True, text=label_data['uuid'])
             if not label_instance and label_data.get('text'):
                 label_instance = models.Label.objects.get(user__isnull=True, text=label_data['text'])
-            
+
             if label_instance:
                 return [label_instance]
 
         return []
-    
+
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
-    
+
 
 class CompanyRatingSerializer(BaseSerializer):
 
     source = LinkSerializer(many=False)
-    
+
     company = serializers.PrimaryKeyRelatedField(read_only=False, queryset=models.Company.objects.all())
 
     one_to_one_fields = {
@@ -351,15 +351,15 @@ class ApplicationSerializer(BaseSerializer):
     class Meta:
         model = models.Application
         fields = (
-            'user', 
-            'user_company', 'position_title', 
-            'job_description_page', 'job_source', 
+            'user',
+            'user_company', 'position_title',
+            'job_description_page', 'job_source',
             'labels', 'notes', 'job_description_notes',
             'statuses') + BaseSerializer.Meta.fields
-    
+
     def get_statuses(self, application):
         return ApplicationStatusSerializer(application.applicationstatus_set.all().order_by('-date'), many=True, context=self.context).data
-    
+
 class PositionLocationSerializer(BaseSerializer):
 
     location = AddressSerializer(many=False)
@@ -376,18 +376,18 @@ class PositionLocationSerializer(BaseSerializer):
 
 
 class ApplicationStatusLinkListSerializer(serializers.ListSerializer):
-    
+
     def update(self, instance, validated_data, **kwargs):
         """
             This ListSerializer is an instruction of when given a list of application status link instances,
             how we should call `ApplicationStatusLinkSerializer(...)`.
-            
+
             This method should return the updated object instances.
 
             We do best effort when dealing with update of multiple instances(=objects):
             If the object is not in our database - we interpret this as a create request
             If the object is in our database - we interpret it as update
-            If an object is in our database, more specifically, within the reverse foreign key set, but not provided from the frontend, 
+            If an object is in our database, more specifically, within the reverse foreign key set, but not provided from the frontend,
             we interpret this as a delete request
         """
 
@@ -400,7 +400,7 @@ class ApplicationStatusLinkListSerializer(serializers.ListSerializer):
         update_data_uuids = list(update_data_table.keys())
         update_instances = []
         for data_uuid in update_data_uuids:
-            
+
             # update - object is in both database and frontend form data
             if data_uuid in all_instance_table:
                 target_data = update_data_table.pop(data_uuid)
@@ -449,10 +449,10 @@ class ApplicationStatusSerializer(BaseSerializer):
     class Meta:
         model = models.ApplicationStatus
         fields = (
-            'text', 'application', 'date', 'order', 
-            
+            'text', 'application', 'date', 'order',
+
             # computed properties
-            'applicationstatuslink_set', 
+            'applicationstatuslink_set',
         ) + BaseSerializer.Meta.fields
 
     def create(self, validated_data):
@@ -461,8 +461,8 @@ class ApplicationStatusSerializer(BaseSerializer):
             validated_data
         )
         # new_application_status = models.ApplicationStatus.objects.create(
-        #     text=validated_data.pop('text'), 
-        #     application=validated_data.pop('application'), 
+        #     text=validated_data.pop('text'),
+        #     application=validated_data.pop('application'),
         #     date=validated_data.pop('date'),
         #     order=validated_data.get('date', '')
         # )
@@ -486,6 +486,6 @@ class ApplicationStatusSerializer(BaseSerializer):
                     'user': new_application_status.application.user,
                 }
             )
-        
-        
+
+
         return new_application_status

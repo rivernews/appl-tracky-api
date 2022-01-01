@@ -1,35 +1,32 @@
-django >= 1.0,<2.0
+django==3.2.10
 
-# 1. You need to do `brew install postgresql` first, for both psycopg2-binary or psycopg2
+# 1. On macOS: you need to do `brew install postgresql` first, for both psycopg2-binary or psycopg2
 # 2. Timezone issue in 2.9, must use 2.8.6, see https://stackoverflow.com/a/68025007/9814131
 # 3. On M1: https://github.com/psycopg/psycopg2/issues/1286#issuecomment-914286206 or https://github.com/psycopg/psycopg2/issues/1200#issuecomment-946436396
 # export CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include"
 # export LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib -L$(pwd)/venv/lib"
 # For production, use `psycopg2`
-# psycopg2 >= 2.0,<2.9
-psycopg2-binary==2.8.6
+psycopg2==2.9.3
+# psycopg2-binary==2.9.3
 
-gunicorn == 19.9.0
+django-cacheops==6.0
 
-djangorestframework==3.9.1
-django-cors-headers==2.4.0
-djangorestframework-jwt >= 1.11,<1.12 # repo deprecated, see https://github.com/jpadilla/django-rest-framework-jwt
+gunicorn==20.1.0
+django-cors-headers==3.10.1
 
-django-filter==2.2.0
-djangorestframework-filters>=1.0.0.dev0
-graphene-django==2.14.0
+djangorestframework==3.13.1
+graphene-django==2.15.0
 
-rest-social-auth < 2.1 # this is st4lk/django-rest-social-auth
+django-filter==2.4.0 # https://github.com/carltongibson/django-filter
+djangorestframework-filters==1.0.0.dev2 # https://github.com/philipn/django-rest-framework-filters
 
-django-cacheops<=4.3
+djangorestframework-simplejwt==4.6.0 # https://github.com/jazzband/djangorestframework-simplejwt
 
 # REST Social Auth dependencies: https://github.com/st4lk/django-rest-social-auth
-social-auth-core >=3.0, <4.0
-social-auth-app-django >=3.1, <4.0 # for social auth pipeline https://github.com/python-social-auth/social-app-django
+rest-social-auth==6.0.1
+social-auth-core==4.0.2
+social-auth-app-django==4.0.0 # for social auth pipeline https://github.com/python-social-auth/social-app-django
 
 # For access to AWS S3
-boto3==1.11.5
-
-elasticsearch-dsl==7.1.0
-
-awscli
+boto3==1.20.26
+awscli==1.22.26
