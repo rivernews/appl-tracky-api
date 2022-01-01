@@ -20,7 +20,7 @@ module "appl_tracky_api" {
   app_label               = "appl-tracky-api"
   app_exposed_port        = 8001
   app_deployed_domain     = "appl-tracky.api.shaungc.com"
-  cors_domain_whitelist   = ["rivernews.github.io", "appl-tracky.shaungc.com"]
+  cors_domain_whitelist   = ["https://rivernews.github.io", "https://appl-tracky.shaungc.com"]
   app_container_image     = "shaungc/appl-tracky-api"
   app_container_image_tag = var.app_container_image_tag
 
