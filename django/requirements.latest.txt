@@ -13,7 +13,7 @@ gunicorn==20.1.0
 
 djangorestframework==3.13.1
 django-cors-headers==3.10.1
-djangorestframework-jwt==1.11.0 # repo deprecated, see https://github.com/jpadilla/django-rest-framework-jwt
+# djangorestframework-jwt==1.11.0 # repo deprecated, see https://github.com/jpadilla/django-rest-framework-jwt
 
 django-filter==2.4.0 # https://github.com/carltongibson/django-filter
 djangorestframework-filters==1.0.0.dev2 # https://github.com/philipn/django-rest-framework-filters
@@ -22,6 +22,7 @@ graphene-django==2.15.0
 # ImportError: cannot import name 'SocialJWTUserAuthView'
 # b/c deprecated djangorestframework-jwt
 # replace by `djangorestframework-simplejwt` https://github.com/jazzband/djangorestframework-simplejwt
+djangorestframework-simplejwt==4.6.0
 rest-social-auth==6.0.1 # https://github.com/st4lk/django-rest-social-auth
 
 django-cacheops==6.0

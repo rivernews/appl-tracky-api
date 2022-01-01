@@ -4,7 +4,10 @@ from rest_framework import routers
 from . import views, graphql_views
 from . import graphql_schema
 
-from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 # REST Framework routes
 router = routers.DefaultRouter()
@@ -35,8 +38,8 @@ urlpatterns = [
     url(r'^login/', include('rest_framework.urls', namespace='rest_framework')),
 
     # JWT token endpoint
-    url(r'^api/api-token-auth/', obtain_jwt_token),
-    url(r'^api/api-token-refresh/', refresh_jwt_token),
+    url(r'^api/api-token-auth/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    url(r'^api/api-token-refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # image upload endpoint
     url(r'^api/private-image/', views.PrivateImageView.as_view(), name='private-image'),

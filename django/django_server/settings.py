@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-import datetime
+from datetime import timedelta
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework', 'corsheaders',
     'django_filters', 'rest_framework_filters',
     'social_django', 'rest_social_auth', # django social auth + rest social auth
+    'rest_framework_simplejwt',
     'cacheops',
     'graphene_django',
 
@@ -80,7 +81,7 @@ if not DEBUG:
 
 # Django CORS header settings
 CORS_ORIGIN_WHITELIST = tuple(filter(bool, [ # filter: https://stackoverflow.com/questions/3845423/remove-empty-strings-from-a-list-of-strings
-        'localhost:3000', # frontend react development server
+        'http://localhost:3000', # frontend react development server
     ] + os.environ.get('CORS_DOMAIN_WHITELIST', '').split(',') # frontend hosted on github page
 ))
 
@@ -234,6 +235,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'global_static')
 
 AUTH_USER_MODEL = 'api.CustomUser'
 
+# social_django has warning when using Django>=3.2
+# same issue here https://github.com/csev/dj4e-samples/issues/25
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 # REST framework settings
 # https://www.django-rest-framework.org/tutorial/quickstart/#pagination
 
@@ -271,12 +276,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated', # this will make all endpoints require login by default for all CRUD operations.
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         # only allow session in development for easy debugging
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ) if DEBUG else (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
     ),
 }
 
@@ -284,12 +289,11 @@ REST_FRAMEWORK = {
 #     REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = ('rest_framework.permissions.AllowAny',)
 
 
-# JWT settings
-# http://getblimp.github.io/django-rest-framework-jwt/
-JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
-    'JWT_ALLOW_REFRESH': True,
-    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=14),
+# JWT djangorestframework-simplejwt settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
+    'USER_ID_FIELD': 'uuid'
 }
 
 # Social Auth

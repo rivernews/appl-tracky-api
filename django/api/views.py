@@ -15,7 +15,7 @@ from . import models
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_social_auth.views import SocialJWTUserAuthView
+from rest_social_auth.views import SocialJWTPairUserAuthView
 from . import serializers as ApiSerializers
 
 from rest_framework import serializers
@@ -64,7 +64,7 @@ class ApiHomeView(TemplateView):
         return context
 
 
-class SocialAuthView(SocialJWTUserAuthView):
+class SocialAuthView(SocialJWTPairUserAuthView):
     serializer_class = ApiSerializers.SocialAuthUserSerializer
 
 
