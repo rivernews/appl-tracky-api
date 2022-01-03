@@ -46,10 +46,10 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
             ** In order to use nested serializer fields, you have to write this .create() function
         """
 
-        # create relational objects
+        # handle one-to-one: create relational objects
         one_to_one_fields_data = self.create_one_to_one_fields(validated_data)
 
-        # link many to many field relational objects
+        # handle many-to-many: link many to many field relational objects
         many_to_many_fields_data = self.create_or_get_many_to_many_fields(validated_data)
 
         # remove uuid to avoid writing to uuid field
@@ -85,15 +85,23 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
             If there's a mismatch between data provided and data model schema,
             it will ignore them.
 
-            Particularly, it will handle one-to-one fields
+            Particularly, it will handle one-to-one fields.
+            NOTE: does not support many-to-many field update at this point.
         """
+
+        # handle one-to-one:
         self.update_one_to_one_fields(instance, validated_data)
+
+        # TODO: handle many-to-many:
 
         # include user info whenever possible
         self.inject_user_info_data(self.Meta.model, validated_data)
 
         # update subject model instance
-        ApiUtils.update_instance(instance, validated_data, excluded_fields=self.one_to_one_fields)
+        ApiUtils.update_instance(instance, validated_data, excluded_fields={
+            **self.one_to_one_fields,
+            **self.many_to_many_fields
+        })
 
         return instance
 
@@ -148,6 +156,20 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
             many_to_many_fields_data[field_name] = []
 
             many_to_many_field_object_list = validated_data.pop(field_name)
+            if all([
+                not isinstance(many_to_many_field_object_list, list),
+                not isinstance(many_to_many_field_object_list, dict),
+            ]):
+                raise ValueError(f'{field_name} is marked as many-to-many field but its value is neither list nor dict: {many_to_many_field_object_list}')
+
+            # if contain no meaningful data then skip the field
+            if many_to_many_field_object_list == [] or many_to_many_field_object_list == {}:
+                continue
+
+            # sometimes frontend may use a single dict to pass in many-to-many field
+            # where such field usually only contains one item
+            if isinstance(many_to_many_field_object_list, dict):
+                many_to_many_field_object_list = [many_to_many_field_object_list]
 
             if create:
                 # many to many field object(s) not yet in db
@@ -346,6 +368,10 @@ class ApplicationSerializer(BaseSerializer):
     one_to_one_fields = {
         'job_description_page': models.Link,
         'job_source': models.Link,
+    }
+
+    many_to_many_fields = {
+        'labels': models.Label
     }
 
     class Meta:
