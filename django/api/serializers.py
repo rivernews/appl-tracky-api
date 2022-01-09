@@ -92,7 +92,8 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
         # handle one-to-one:
         self.update_one_to_one_fields(instance, validated_data)
 
-        # TODO: handle many-to-many:
+        # handle many-to-many:
+        self.update_many_to_many_fields(instance, validated_data)
 
         # include user info whenever possible
         self.inject_user_info_data(self.Meta.model, validated_data)
@@ -138,6 +139,29 @@ class BaseSerializer(serializers.HyperlinkedModelSerializer):
             one_to_one_fields[field_name] = ApiUtils.create_instance(instance_model, one_to_one_data)
 
         return one_to_one_fields
+
+    def update_many_to_many_fields(self, instance, validated_data) -> None:
+        '''Update many-to-many fields on `instance` in-place
+        Strategy: update the references, but not the object themselves
+
+        Example:
+            ```
+            instance.labels=[db_object_01, db_object_02, db_object_03]
+            validated_data.labels=[db_object_01, db_object_04]
+            ```
+            The result would be instance.labels=[db_object_01, db_object_04]
+        Note:
+            New object like `db_object_04` should be ALREADY created/existed in db
+            Existing object like `db_object_01` should be the current object in db, no mutation of `db_object_01` is allowed here
+        '''
+        for field_name, model in self.many_to_many_fields.items():
+            # NOTE: currently we don't assume dict to be single-element list
+            # you can still transform it into a list in `def validate()` or `def validate_<field_name>()`
+            if not isinstance(validated_data[field_name], list):
+                raise ValueError(f'Many to many field {model}.{field_name} should be a list after validated, but instead it is type `{type(validated_data[field_name])}`: {validated_data[field_name]}')
+            getattr(instance, field_name).set(validated_data[field_name])
+
+        return
 
     def create_or_get_many_to_many_fields(self, validated_data, create=False):
         """Method to return data of many to many fields.
